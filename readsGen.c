@@ -1,11 +1,11 @@
 /*
  *  @Developer:     Juan Camilo Peña Vahos
- *  @Last Revised:  26/06/2018
+ *  @Last Revised:  4/07/2018
  *  @Description:   Generador artificial de reads para simular casos de prueba del compresor.
  *
 */
 /*
- *	Todo: 	        .
+ *	Todo: 	     	COMO OBTENER EL READ USANDO UNA FUNCIÓN
 */
 /*
  *	ULTIMA LABOR:		 
@@ -52,7 +52,6 @@
 
 //DECLARACIÓN DE VARIABLES GLOBALES
 
-
 int main (int argc, char *argv[]) {	
     
 	//ARGUMENTOS DE ENTRADA
@@ -93,9 +92,8 @@ int main (int argc, char *argv[]) {
 		}
 	}
 	//C1
-
-	//A.GENERAR ALEATORIAMENTE LA POSICIÓN DE MAPEO
-	//	1. SE DEBE TENER EN UN ARREGLO LA REFERENCIA
+	//A. GENERAR ALEATORIAMENTE LA POSICIÓN DE MAPEO
+    //	1.SABER LA CANTIDAD DE CARACTERES DE LA REFERENCIA
 	int contChars	=	0;							
     int estado;
 	char c;
@@ -104,7 +102,7 @@ int main (int argc, char *argv[]) {
 	pf = fopen(DATA,"r"); 
 	if(pf!=NULL){								
 		while((c = getc(pf)) != EOF){
-            if(c == '>')    estado  =   0;                          //EL ESTADO 0 SON LOS COMENTARIOS           
+            if(c == '>')    estado  =   0;		//EL ESTADO 0 SON LOS COMENTARIOS           
             switch(estado){
                 case 0: if(c    ==  '\n')   estado  =   1;  break;
                 case 1: if(c    !=  '\n')   contChars++;    break;
@@ -112,37 +110,47 @@ int main (int argc, char *argv[]) {
 		}
 	}
 	fclose(pf);
-    //      *GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
-    srand(time(0));
-    int position = (rand() %((contChars-L) - 0 + 1)) + 0;
-    //      *SACAR LA PORCIÓN DEL ARCHIVO
-    char REF[L];
-    //REF = malloc(L*sizeof(char*));                                //REFERENCIA
-    int i   =   0;                                                  //Contador para la referencia
-    int contAux =   0;  
-    int upper   =   position+L;                    
-    pf = fopen(DATA,"r"); 
-	if(pf!=NULL){								
+	Reference	=	malloc(contChars*sizeof(char*));
+	//		2.OBTENER LA REFERENCIA
+	int j	=	0;
+	pf	=	fopen(DATA,"r");
+	if(pf	!=	NULL){
 		while((c = getc(pf)) != EOF){
-            if(c == '>')    estado  =   0;                          //EL ESTADO 0 SON LOS COMENTARIOS           
+            if(c == '>')    estado  =   0;                          
             switch(estado){
-                case 0: 
-                    if(c    ==  '\n'){
-                        estado  =   1;
-                    }
-                break;
+                case 0: if(c == '\n')	estado  =   1;	break;
                 case 1: if(c    !=  '\n'){   
-                    contAux++;
+                    Reference[j]	=	c;
+					j++;
                 }   
                 break;
             }
-            if((contAux  >= position)&&(contAux<upper)){
-                REF[i]  =   c;
-                i++;
-            }
 		}
 	}
-    printf("REFERENCIA: %s\n",REF);
 	fclose(pf);
+    //			3.GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
+    srand(time(0));
+    int position = (rand() %((contChars-L) - 0 + 1)) + 0;
+    //printf("%d\n", position);
+
+    //				4.SACAR LA PORCIÓN DEL ARREGLO
+	printf("L	=	%d;  POS	=	%d\n",L,position);
+	char READ[L];
+	for(int i = 0;	i < L;	i++){
+		switch(Reference[position+i]){
+			case 'a':	READ[i] = 'A'; break;
+			case 'A':	READ[i]	= 'A'; break;
+			case 'c':	READ[i] = 'C'; break;
+			case 'C':	READ[i]	= 'C'; break;
+			case 'g':	READ[i] = 'G'; break;
+			case 'G':	READ[i]	= 'G'; break;
+			case 't':	READ[i] = 'T'; break;
+			case 'T':	READ[i]	= 'T'; break;
+			default:	READ[i]	= 'N';
+		}
+	}
+	printf("Read:	%s\n",READ);
+
+	
 	return 0;
 }

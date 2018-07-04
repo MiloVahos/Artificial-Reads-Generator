@@ -16,11 +16,12 @@
 //DECLARACIÓN DE FUNCIONES
 void ReverseRead(char*,long);
 void ComplementRead(char*,long);
+int BusqBin_Rul(double[], int, double);
 
 int main (int argc, char *argv[]) {	
     
 	//ARGUMENTOS DE ENTRADA
-	int L	=   31;
+	int L	=   30;
 
 	//VARIABLES DEL PROCESO PARA SALIDA								
 	char *MT;										//MATCHING TYPE
@@ -28,7 +29,9 @@ int main (int argc, char *argv[]) {
     //PARA EL PROBAR EL MATCHING, SE ASUME LA SIGUIENTE CADENA.
     int MatType;
     char Read[L];
-    
+    double MatTypeStats[]   =   {0.4,0.8,0.9,1};  //FORWARD, REVERSE, COMPLEMENT, REVERSE COMPLEMENT
+                                                  //PROBABILITIES:  0.4 - 0.4 - 0.1 - 0.1
+
     //Read = (char*) malloc(L*sizeof(char));
     if (Read==NULL) {
         printf("There is no space in memory\n");
@@ -40,23 +43,23 @@ int main (int argc, char *argv[]) {
         switch(i){
             case 0:                     //DIRECT MATCH
                 MT  =   "F";
-                printf("DM: %s\n",Read);
+                printf("F: %s\n",Read);
             break;
             case 1:                     //REVERSE MATCH
                 MT  =   "R";
                 ReverseRead(Read,L);
-                printf("RM: %s\n",Read);
+                printf("R: %s\n",Read);
             break;
             case 2:                     //COMPLEMENT MATCH
                 MT  =   "C";
                 ComplementRead(Read,L);
-                printf("CM: %s\n",Read);
+                printf("C: %s\n",Read);
             break;
             case 3:                     //REVERSE COMPLEMENT MATCH
                 MT  =   "E";
                 ComplementRead(Read,L);
                 ReverseRead(Read,L);
-                printf("RCM: %s\n",Read);                
+                printf("E: %s\n",Read);                
             break;
             default:    printf ("**Error in the matching selection, wrong input base**");
         }
@@ -100,3 +103,22 @@ void ComplementRead(char *Read, long length){
 	}
 
 };
+
+//BusqBin_Rul: función que utiliza el procedimiento de la Busq. Binaria
+//             para ubicar el elemento seleccionado a través del mecanismo
+//	            de la ruleta a fin de seleccionar los Padres.
+int BusqBin_Rul(double prob[], int n, double x){
+	int primero,ultimo,central;
+	short encontrado;
+
+	primero= 1 ; ultimo= n ; encontrado=0;
+	while ((primero <= ultimo) && (encontrado==0)){
+   	central = (primero + ultimo)/2;
+      if (x == prob[central]) encontrado = 1;
+      else
+      	if (x > prob[central]) primero = central + 1;
+         else ultimo = central - 1;
+   }
+	return(central);
+}
+
