@@ -20,58 +20,57 @@ void ComplementRead(char*,long);
 int main (int argc, char *argv[]) {	
     
 	//ARGUMENTOS DE ENTRADA
-	int L	=   30;
+	int L	=   31;
 
 	//VARIABLES DEL PROCESO PARA SALIDA								
 	char *MT;										//MATCHING TYPE
 
     //PARA EL PROBAR EL MATCHING, SE ASUME LA SIGUIENTE CADENA.
     int MatType;
-    char *Read;
+    char Read[L];
     
-    Read = malloc(L*sizeof(char));
+    //Read = (char*) malloc(L*sizeof(char));
     if (Read==NULL) {
         printf("There is no space in memory\n");
         exit (1);
     }
-    printf("%lu\n",sizeof(Read));
-    Read = "GGGCGGCGACCTCGCGGGTTTTCGCTATTT";
-    
-	
-    printf("RM: %s\n",Read);
+    strcpy(Read,"GGGCGGCGACCTCGCGGGTTTTCGCTATTTA");
 
-    /*for(int i = 0; i<4; i++){
+    for(int i = 0; i<4; i++){
         switch(i){
             case 0:                     //DIRECT MATCH
-                MT  =   "DM";
+                MT  =   "F";
                 printf("DM: %s\n",Read);
             break;
             case 1:                     //REVERSE MATCH
-                MT  =   "RM";
+                MT  =   "R";
                 ReverseRead(Read,L);
                 printf("RM: %s\n",Read);
             break;
             case 2:                     //COMPLEMENT MATCH
-                MT  =   "CM";
+                MT  =   "C";
                 ComplementRead(Read,L);
                 printf("CM: %s\n",Read);
             break;
             case 3:                     //REVERSE COMPLEMENT MATCH
-                MT  =   "RCM";
+                MT  =   "E";
                 ComplementRead(Read,L);
                 ReverseRead(Read,L);
                 printf("RCM: %s\n",Read);                
             break;
             default:    printf ("**Error in the matching selection, wrong input base**");
         }
-        Read = "GGGCGGCGACCTCGCGGGTTTTCGCTATTT";
-    }*/
+        strcpy(Read,"GGGCGGCGACCTCGCGGGTTTTCGCTATTTA");
+    }
 }
 
 //Implementa el Inversor de reads 
 void ReverseRead(char *Read, long length){
 	char aux;
-	for (int i=0; i<length;i++){
+    int resto = length%2;
+    printf("%d\n",resto);
+	for (int i=0; i<length/2;i++){
+        //printf("READI = %c , READLEN = %c, i =  %d, resto = %d\n",Read[i],Read[length-i-1], i, length-i-1);
 		aux=Read[length-i-1];
 		Read[length-i-1]=Read[i];
 		Read[i]=aux;
