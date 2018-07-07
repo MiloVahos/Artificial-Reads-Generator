@@ -13,10 +13,14 @@
 #include <time.h>
 #include <math.h>
 
+#define MATCHING_TYPES 4
+
 //DECLARACIÓN DE FUNCIONES
 void ReverseRead(char*,long);
 void ComplementRead(char*,long);
-int BusqBin_Rul(double[], int, double);
+int  BusqBin_Rul(double[], int, double);
+double CalculaTotal(int,double[]);
+double LanzarDado();
 
 int main (int argc, char *argv[]) {	
     
@@ -27,58 +31,78 @@ int main (int argc, char *argv[]) {
 	char *MT;										//MATCHING TYPE
 
     //PARA EL PROBAR EL MATCHING, SE ASUME LA SIGUIENTE CADENA.
-    int MatType;
+    int MatType;                                   
     char Read[L];
-    double MatTypeStats[]   =   {0.4,0.8,0.9,1};  //FORWARD, REVERSE, COMPLEMENT, REVERSE COMPLEMENT
-                                                  //PROBABILITIES:  0.4 - 0.4 - 0.1 - 0.1
+    //ORDEN DE LOS ARREGLOS 
+    //FORWARD(F), REVERSE(R), COMPLEMENT(C), REVERSE COMPLEMENT(E)
+    double MatTypeStats[MATCHING_TYPES]   =   {0.4,0.4,0.1,0.1};  
+    double Acum_fun[MATCHING_TYPES];
 
-    //Read = (char*) malloc(L*sizeof(char));
-    if (Read==NULL) {
-        printf("There is no space in memory\n");
-        exit (1);
-    }
     strcpy(Read,"GGGCGGCGACCTCGCGGGTTTTCGCTATTTA");
+    printf("READ ORIGINAL: %s\n",Read);
 
-    for(int i = 0; i<4; i++){
-        switch(i){
-            case 0:                     //DIRECT MATCH
-                MT  =   "F";
-                printf("F: %s\n",Read);
-            break;
-            case 1:                     //REVERSE MATCH
-                MT  =   "R";
-                ReverseRead(Read,L);
-                printf("R: %s\n",Read);
-            break;
-            case 2:                     //COMPLEMENT MATCH
-                MT  =   "C";
-                ComplementRead(Read,L);
-                printf("C: %s\n",Read);
-            break;
-            case 3:                     //REVERSE COMPLEMENT MATCH
-                MT  =   "E";
-                ComplementRead(Read,L);
-                ReverseRead(Read,L);
-                printf("E: %s\n",Read);                
-            break;
-            default:    printf ("**Error in the matching selection, wrong input base**");
-        }
-        strcpy(Read,"GGGCGGCGACCTCGCGGGTTTTCGCTATTTA");
+    //CALCULAR EL ARREGLO CON LA FUNCIÓN DE PROBABILIDADES ACUMULADAS
+	double total_adapt = CalculaTotal(MATCHING_TYPES,MatTypeStats);
+	Acum_fun[0]= MatTypeStats[0] / total_adapt;
+	for (int i=1; i<MATCHING_TYPES; i++){
+        Acum_fun[i]= (MatTypeStats[i] / total_adapt) + Acum_fun[i-1];
     }
+    printf("PROBABILIDADES POR INDIVIDUO: ");
+    for(int i = 0; i<MATCHING_TYPES; i++){
+        printf("%lf, ",MatTypeStats[i]);
+    }
+    printf("\n");
+    printf("PROBABILIDADES ACUMULADAS: ");
+    for(int i = 0; i<MATCHING_TYPES; i++){
+        printf("%lf, ",Acum_fun[i]);
+    }
+    printf("\n");
+
+    //LANZAR EL DADO
+    double dado = LanzarDado();
+    printf("Resultado del dado = %lf\n", dado);
+
+    //GIRAR LA RULETA
+    int MatTypeSel  =   BusqBin_Rul(Acum_fun,MATCHING_TYPES,dado);
+    printf("Selección de la ruleta = %d\n", MatTypeSel);
+
+    switch(MatTypeSel){
+        case 1:                     //FORWARD MATCH
+            MT  =   "F";
+            printf("F: %s\n",Read);
+        break;
+        case 2:                     //REVERSE MATCH
+            MT  =   "R";
+            ReverseRead(Read,L);
+            printf("R: %s\n",Read);
+        break;
+        case 3:                     //COMPLEMENT MATCH
+            MT  =   "C";
+            ComplementRead(Read,L);
+            printf("C: %s\n",Read);
+        break;
+        case 4:                     //REVERSE COMPLEMENT MATCH
+            MT  =   "E";
+            ComplementRead(Read,L);
+            ReverseRead(Read,L);
+            printf("E: %s\n",Read);                
+        break;
+        default:    printf ("**Error in the matching selection, wrong input base**");
+    }
+    
 }
 
 //Implementa el Inversor de reads 
 void ReverseRead(char *Read, long length){
 	char aux;
     int resto = length%2;
-    printf("%d\n",resto);
 	for (int i=0; i<length/2;i++){
         //printf("READI = %c , READLEN = %c, i =  %d, resto = %d\n",Read[i],Read[length-i-1], i, length-i-1);
 		aux=Read[length-i-1];
 		Read[length-i-1]=Read[i];
 		Read[i]=aux;
 	}
-};
+}
 
 //Implementa el complementador de reads (T,A)(C,G)
 void ComplementRead(char *Read, long length){
@@ -102,23 +126,48 @@ void ComplementRead(char *Read, long length){
 		Read[i]=Compl;
 	}
 
-};
+}
 
 //BusqBin_Rul: función que utiliza el procedimiento de la Busq. Binaria
 //             para ubicar el elemento seleccionado a través del mecanismo
 //	            de la ruleta a fin de seleccionar los Padres.
+//@param: double prob[] : vector de probabilidades acumuladas
+//@param: n :   número de elementos en prob[]
+//@param: x :   resultado de lanzar los dados (es decir, usar rand para generar un número)
 int BusqBin_Rul(double prob[], int n, double x){
+
 	int primero,ultimo,central;
 	short encontrado;
-
-	primero= 1 ; ultimo= n ; encontrado=0;
+    primero     =   1;
+    ultimo      =   n;
+    encontrado  =   0;
 	while ((primero <= ultimo) && (encontrado==0)){
-   	central = (primero + ultimo)/2;
-      if (x == prob[central]) encontrado = 1;
-      else
-      	if (x > prob[central]) primero = central + 1;
-         else ultimo = central - 1;
+   	    central = (primero + ultimo)/2;
+        if      (x  ==   prob[central]) encontrado = 1;
+        else if (x  >    prob[central]) primero = central + 1;
+        else                            ultimo = central - 1;
    }
-	return(central);
+   return(central);
 }
+
+//CalculaTotal: Calculo de la Sumatoria de las Func. Aadaptación
+//              de cada Individuo de la Poblacion.
+//@param: a[] : vector de probabilidades de cada individuo, sin acumular
+//@param: n :   número de elementos en a[]
+double CalculaTotal(int n, double a[]){
+
+	int i;
+	double aux=0;
+    for (i=0;i<n;i++) {	aux = aux + a[i];}
+	return aux;
+}
+
+//LanzarDado: devuelve un valor entre 0 y 1 aleatorio
+double LanzarDado(){
+    srand(time(0));
+    double dado = 0+(1-0)*rand()/((double)RAND_MAX);
+    return dado;
+}
+
+
 
