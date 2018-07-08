@@ -52,6 +52,7 @@ int main (int argc, char *argv[]) {
         printf("%lf, ",MatTypeStats[i]);
     }
     printf("\n");
+
     printf("PROBABILIDADES ACUMULADAS: ");
     for(int i = 0; i<MATCHING_TYPES; i++){
         printf("%lf, ",Acum_fun[i]);
@@ -67,21 +68,21 @@ int main (int argc, char *argv[]) {
     printf("Selección de la ruleta = %d\n", MatTypeSel);
 
     switch(MatTypeSel){
-        case 1:                     //FORWARD MATCH
+        case 0:                     //FORWARD MATCH
             MT  =   "F";
             printf("F: %s\n",Read);
         break;
-        case 2:                     //REVERSE MATCH
+        case 1:                     //REVERSE MATCH
             MT  =   "R";
             ReverseRead(Read,L);
             printf("R: %s\n",Read);
         break;
-        case 3:                     //COMPLEMENT MATCH
+        case 2:                     //COMPLEMENT MATCH
             MT  =   "C";
             ComplementRead(Read,L);
             printf("C: %s\n",Read);
         break;
-        case 4:                     //REVERSE COMPLEMENT MATCH
+        case 3:                     //REVERSE COMPLEMENT MATCH
             MT  =   "E";
             ComplementRead(Read,L);
             ReverseRead(Read,L);
@@ -130,7 +131,7 @@ void ComplementRead(char *Read, long length){
 
 //BusqBin_Rul: función que utiliza el procedimiento de la Busq. Binaria
 //             para ubicar el elemento seleccionado a través del mecanismo
-//	            de la ruleta a fin de seleccionar los Padres.
+//	            de la ruleta
 //@param: double prob[] : vector de probabilidades acumuladas
 //@param: n :   número de elementos en prob[]
 //@param: x :   resultado de lanzar los dados (es decir, usar rand para generar un número)
@@ -138,16 +139,18 @@ int BusqBin_Rul(double prob[], int n, double x){
 
 	int primero,ultimo,central;
 	short encontrado;
-    primero     =   1;
-    ultimo      =   n;
+    primero     =   0;
+    ultimo      =   n-1;
     encontrado  =   0;
 	while ((primero <= ultimo) && (encontrado==0)){
    	    central = (primero + ultimo)/2;
         if      (x  ==   prob[central]) encontrado = 1;
         else if (x  >    prob[central]) primero = central + 1;
         else                            ultimo = central - 1;
+        //printf("primer %d\n",primero);
+        //printf("ultimo %d\n",ultimo);
    }
-   return(central);
+   return(primero);
 }
 
 //CalculaTotal: Calculo de la Sumatoria de las Func. Aadaptación
