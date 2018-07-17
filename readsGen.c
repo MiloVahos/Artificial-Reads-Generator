@@ -58,18 +58,19 @@
 #include <inttypes.h>
 
 //DECLARACIÓN DE CONSTANTES
-#define MATCHING_TYPES 4
-#define EXP 2.71828
+#define MATCHING_TYPES 	4
+#define EXP 			2.71828
+#define READ_BIAS		50
 
 //DECLARACIÓN DE FUNCIONES
-void 	ReverseRead(char*,long);
-void 	ComplementRead(char*,long);
-int  	BusqBin_Rul(double[], int, double);
-double 	CalculaTotal(int,double[]);
-double 	LanzarDado();
-long int contChars(char*);
-void 	getReference(char*,char*);
-void 	getRead(char*,char*,long int,int);
+void 			ReverseRead(char*,long);
+void 			ComplementRead(char*,long);
+int  			BusqBin_Rul(double[], int, double);
+double 			CalculaTotal(int,double[]);
+double 			LanzarDado();
+long int 		contChars(char*);
+void 			getReference(char*,char*);
+void			selMatching(int,int,char*,char*);
 
 //DECLARACIÓN DE VARIABLES GLOBALES
 
@@ -85,8 +86,8 @@ int main (int argc, char *argv[]) {
 	int 	E	=	0;
 
 	//VARIABLES DEL PROCESO PARA SALIDA
-	float 	lambda = 0;									//
-	char	*MT;										//MATCHING TYPE
+	float 	lambda 	= 0;								//
+	char	*MT		=	(char*) malloc(sizeof(char));	//MATCHING TYPE
 	char	*OT;										//OPERATION (MUTATION) TYPE
 
 	//VARIABLES DEL PROCESO PARA OPERAR
@@ -116,7 +117,7 @@ int main (int argc, char *argv[]) {
 	}
 
 	//OBTENER EL NOMBRE DE LA SECUENCIA Y CREAR EL NOMBRE DE LOS ARCHIVOS DE SALIDA
-	Name	=	malloc(50*sizeof(char));
+	Name	=	malloc(40*sizeof(char));
 	char *dot;
 	dot		=	strrchr(DATA,'.');
 	strncpy(Name,DATA,dot - DATA);
@@ -125,21 +126,21 @@ int main (int argc, char *argv[]) {
     //	1.SABER LA CANTIDAD DE CARACTERES DE LA REFERENCIA
 	TotalChars	=	contChars(DATA);
 	//		2.OBTENER LA REFERENCIA
-	Reference	=	malloc(TotalChars*sizeof(char*));
+	Reference	=	(char*) malloc(TotalChars*sizeof(char));
 	getReference(DATA,Reference);
 	TotalReads	=	B*C;				//Número total de Reads a generar
-
+	srand(time(NULL));
 	for(int ReadsCicle = 0;	ReadsCicle<TotalReads; ReadsCicle++){
 		//			3.GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
-		srand(time(0));
 		long int position = (rand() %((TotalChars-L) - 0 + 1)) + 0;
 		//				4.SACAR LA PORCIÓN DEL ARREGLO
-		char *Read	=	NULL;
-		Read	=	malloc(L*sizeof(char*));
-		getRead(Reference,Read,position,L);
+		char *Read	=	(char*) malloc((L+READ_BIAS)*sizeof(char));
+		memcpy(Read,Reference+position,L);
+		//printf("read length:	%ld\n",strlen(Read));
 		printf("Read:	%s\n",Read);
-		/*//B.CALCULAR EL MATCHING
-		
+			
+
+		//B.CALCULAR EL MATCHING
 		//ORDEN DE LOS ARREGLOS 
 		//FORWARD(F), REVERSE(R), COMPLEMENT(C), REVERSE COMPLEMENT(E)
 		double MatTypeStats[MATCHING_TYPES]   =   {0.4,0.4,0.1,0.1};  
@@ -153,48 +154,20 @@ int main (int argc, char *argv[]) {
 
 		//LANZAR EL DADO
 		double dado = LanzarDado();
-		printf("Resultado del dado = %lf\n", dado);
-
+		printf("Dado	=	%f\n",dado);
 		//GIRAR LA RULETA
 		int MatTypeSel  =   BusqBin_Rul(Acum_fun,MATCHING_TYPES,dado);
-		printf("Selección de la ruleta = %d\n", MatTypeSel);
-
-		switch(MatTypeSel){
-			case 0:                     //FORWARD MATCH
-				MT  =   "F";
-				printf("F: %s\n",READ);
-			break;
-			case 1:                     //REVERSE MATCH
-				MT  =   "R";
-				ReverseRead(READ,L);
-				printf("R: %s\n",READ);
-			break;
-			case 2:                     //COMPLEMENT MATCH
-				MT  =   "C";
-				ComplementRead(READ,L);
-				printf("C: %s\n",READ);
-			break;
-			case 3:                     //REVERSE COMPLEMENT MATCH
-				MT  =   "E";
-				ComplementRead(READ,L);
-				ReverseRead(READ,L);
-				printf("E: %s\n",READ);                
-			break;
-			default:    printf ("**Error in the matching selection, wrong input base**");
-		}*/
-
-		free(Read);
+		printf("Matching Type	=	%d\n",MatTypeSel);
+		//APLICAR EL MATCHING
+		selMatching(MatTypeSel,L,Read,MT);
+		printf("Matching Type:	%s  ",MT);
+		printf("Match Read:	%s\n",Read);
 	}
-
-    
-
 
 	free(Name);
 	free(Reference);
 	return 0;
 }
-
-//FUNCIONES
 
 //contChars: Cuenta el número de caractéres que tiene el archivo de referencia
 //@param: char *FileName : Nombre del archivo
@@ -232,8 +205,18 @@ void getReference(char *FileName, char *Reference){
             if(c == '>')    estado  =   0;                          
             switch(estado){
                 case 0: if(c == '\n')	estado  =   1;	break;
-                case 1: if(c    !=  '\n'){   
-                    Reference[j]	=	c;
+                case 1: if(c    !=  '\n'){  
+					switch(c){
+						case 'a':	Reference[j] = 'A'; break;
+						case 'A':	Reference[j]	= 'A'; break;
+						case 'c':	Reference[j] = 'C'; break;
+						case 'C':	Reference[j]	= 'C'; break;
+						case 'g':	Reference[j] = 'G'; break;
+						case 'G':	Reference[j]	= 'G'; break;
+						case 't':	Reference[j] = 'T'; break;
+						case 'T':	Reference[j]	= 'T'; break;
+						default:	Reference[j]	= 'N';
+					} 
 					j++;
                 }   
                 break;
@@ -243,65 +226,26 @@ void getReference(char *FileName, char *Reference){
 	fclose(pf);
 }
 
-//getRead:	Obtiene el read de la referencia
-//@param:	char *Reference		:Arreglo con la referencia
-//@param:	char *READ			:Arreglo donde se va a almacenar el Read
-//@param:	long int position	:Posición desde la cual se va a tomar el Read
-//@param:	int L				:Longitud del Read
-void getRead(char* Reference,char* READ,long int position,int L){
-	for(int i = 0;	i < L;	i++){
-		switch(Reference[position+i]){
-			case 'a':	READ[i] = 'A'; break;
-			case 'A':	READ[i]	= 'A'; break;
-			case 'c':	READ[i] = 'C'; break;
-			case 'C':	READ[i]	= 'C'; break;
-			case 'g':	READ[i] = 'G'; break;
-			case 'G':	READ[i]	= 'G'; break;
-			case 't':	READ[i] = 'T'; break;
-			case 'T':	READ[i]	= 'T'; break;
-			default:	READ[i]	= 'N';
-		}
+void selMatching(int MatTypeSel, int L, char *READ, char *MT){
+	switch(MatTypeSel){
+		case 0:                     //FORWARD MATCH
+			memcpy(MT,"F",1);
+		break;
+		case 1:                     //REVERSE MATCH
+			memcpy(MT,"R",1);
+			ReverseRead(READ,L);
+		break;
+		case 2:                     //COMPLEMENT MATCH
+			memcpy(MT,"C",1);
+			ComplementRead(READ,L);
+		break;
+		case 3:                     //REVERSE COMPLEMENT MATCH
+			memcpy(MT,"E",1);
+			ComplementRead(READ,L);
+			ReverseRead(READ,L);              
+		break;
+		default:    printf ("**Error in the matching selection, wrong input base**");
 	}
-}
-
-//ReverseRead:	Implementa el inversor de reads
-//@param:	char *Read	:	Arreglo con el Read
-//@param:	long length	:	Longitud del Read
-void ReverseRead(char *Read, long length){
-	char aux;
-    int resto = length%2;
-	for (int i=0; i<length/2;i++){
-        //printf("READI = %c , READLEN = %c, i =  %d, resto = %d\n",Read[i],Read[length-i-1], i, length-i-1);
-		aux=Read[length-i-1];
-		Read[length-i-1]=Read[i];
-		Read[i]=aux;
-	}
-}
-
-//ComplementRead:	Implementa el complementador de reads (T,A)(C,G)
-//@param:	char *Read	:	Arreglo con el Read
-//@param:	long length	:	Longitud del Read
-void ComplementRead(char *Read, long length){
-	char Compl;
-	int i;
-	for (i=0; i<length;i++){
-		switch(Read[i]){
-		    case 'A': Compl='T'; break;
-		    case 'a': Compl='T'; break;
-		    case 'C': Compl='G'; break;
-		    case 'c': Compl='G'; break;
-		    case 'G': Compl='C'; break;
-		    case 'g': Compl='C'; break;
-		    case 'T': Compl='A'; break;
-		    case 't': Compl='A'; break;
-		    case 'N': Compl='N'; break; 
-		    case 'n': Compl='N' ;break;
-		    default: printf ("**Error building the complement, wrong input base**");
-		}
-
-		Read[i]=Compl;
-	}
-
 }
 
 //BusqBin_Rul: función que utiliza el procedimiento de la Busq. Binaria
@@ -342,7 +286,46 @@ double CalculaTotal(int n, double a[]){
 
 //LanzarDado: devuelve un valor entre 0 y 1 aleatorio
 double LanzarDado(){
-    srand(time(0));
     double dado = 0+(1-0)*rand()/((double)RAND_MAX);
     return dado;
+}
+
+//ReverseRead:	Implementa el inversor de reads
+//@param:	char *Read	:	Arreglo con el Read
+//@param:	long length	:	Longitud del Read
+void ReverseRead(char *Read, long length){
+	char aux;
+    int resto = length%2;
+	for (int i=0; i<length/2;i++){
+        //printf("READI = %c , READLEN = %c, i =  %d, resto = %d\n",Read[i],Read[length-i-1], i, length-i-1);
+		aux=Read[length-i-1];
+		Read[length-i-1]=Read[i];
+		Read[i]=aux;
+	}
+}
+
+//ComplementRead:	Implementa el complementador de reads (T,A)(C,G)
+//@param:	char *Read	:	Arreglo con el Read
+//@param:	long length	:	Longitud del Read
+void ComplementRead(char *Read, long length){
+	char Compl;
+	int i;
+	for (i=0; i<length;i++){
+		switch(Read[i]){
+		    case 'A': Compl='T'; break;
+		    case 'a': Compl='T'; break;
+		    case 'C': Compl='G'; break;
+		    case 'c': Compl='G'; break;
+		    case 'G': Compl='C'; break;
+		    case 'g': Compl='C'; break;
+		    case 'T': Compl='A'; break;
+		    case 't': Compl='A'; break;
+		    case 'N': Compl='N'; break; 
+		    case 'n': Compl='N' ;break;
+		    default: printf ("**Error building the complement, wrong input base**");
+		}
+
+		Read[i]=Compl;
+	}
+
 }
