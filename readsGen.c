@@ -1,6 +1,6 @@
 /*
  *  @Developer:     Juan Camilo Peña Vahos
- *  @Last Revised:  09/07/2018
+ *  @Last Revised:  17/07/2018
  *  @Description:   Generador artificial de reads para simular casos de prueba del compresor.
  *
 */
@@ -33,10 +33,7 @@
  * 		E		-> 	CANTIDAD DE ERRORES DE CADA READ, DEBE SER MENOR QUE LA LONGITUD
  * 		P		->	ES UNA BANDERA, SI ESTÁ ACTIVADA, ENTONCES SOLO SE CONSIDERAN DOS TIPOS
  * 					DE MATCHING, FORWARD AND REVERSE EQUIPROBABLES DE SUCEDER (OPCIONAL)
- * 
- * 	2.	PROCESO DE GENERACIÓN DE READS
- *		A. GENERAR ALEATORIAMENTE LA POSICIÓN DE MAPEO
-		B. CALCULAR EL MATCHING
+ * 		lambda	->	VALOR AJUSTABLE PARA MODIFICAR LA FUNCIÓN EXPONENCIAL
 */
 /*
  * 	SALIDA DEL PROGRAMA:
@@ -58,114 +55,221 @@
 #include <inttypes.h>
 
 //DECLARACIÓN DE CONSTANTES
-#define MATCHING_TYPES 	4
-#define EXP 			2.71828
-#define READ_BIAS		50
+
+#define MATCHING_TYPES 	4		//NÚMERO DE MATCHINGS POSIBLES
+#define MUTATION_TYPES	8		//NÚMERO DE MUTACIONES POSIBLES
+#define EXP 			2.71828	//VALOR DEL NÚMERO e
+#define READ_BIAS		50		//SE OBTIENEN ALGUNAS BASES EXTRAS PARA OPERAR 
+#define ERROR_PER   	0.25    //PORCENTAJE DE ERRORES EN EL READ
+#define TINICIAL		0		//VALOR INICIAL DE t
 
 //DECLARACIÓN DE FUNCIONES
 void 			ReverseRead(char*,long);
 void 			ComplementRead(char*,long);
 int  			BusqBin_Rul(double[], int, double);
 double 			CalculaTotal(int,double[]);
-double 			LanzarDado();
+double 			LanzarDado(double);
 long int 		contChars(char*);
 void 			getReference(char*,char*);
 void			selMatching(int,int,char*,char*);
+int 			AdjustKExp(double*,int,double,int);
+double 			exp1(int,double);
 
-//DECLARACIÓN DE VARIABLES GLOBALES
 
 int main (int argc, char *argv[]) {	
     
 	//ARGUMENTOS DE ENTRADA
-	char 	*DATA;
-	char 	*I;
-	char 	*Q;
-	int 	L	=	0;
-	int		C	=	0;
-	int 	B	=	0;
-	int 	E	=	0;
+	char 	*DATA;					//NOMBRE DEL ARCHIVO
+	char 	*I;						//IDENTIFICADOR DE LOS READS
+	char 	*Q;						//VALOR DEL QUALITY SCORE
+	int 	L	=	0;				//LONGITUD DEL READ
+	int		C	=	0;				//COVERAGE
+	int 	B	=	0;				//BASE
+	int 	E	=	0;				//CANTIDAD EXACTA DE ERRORES
+	int 	P	=	0;				//BANDERA DE EVENTO SOLO FORWARD AND REVERSE
+	double 	lambda 	= 0;			//VALOR AJUSTABLE DE ENTRADA
+
 
 	//VARIABLES DEL PROCESO PARA SALIDA
-	float 	lambda 	= 0;								//
 	char	*MT		=	(char*) malloc(sizeof(char));	//MATCHING TYPE
-	char	*OT;										//OPERATION (MUTATION) TYPE
+	char	*OTy	=	(char*) malloc(2*sizeof(char)); //OPERATION (MUTATION) TYPE
 
 	//VARIABLES DEL PROCESO PARA OPERAR
-	char		*Reference	=	NULL;					//REFERENCIA OBTENIDA DEL ARCHIVO FASTA
-	char 		*Name		=	NULL;					//NOMBRE DE LOS ARCHIVOS
+	char		*Reference		=	NULL;				//REFERENCIA OBTENIDA DEL ARCHIVO FASTA
+	char		*Read			=	NULL;				//READ
+	char 		*RefName		=	NULL;				//NOMBRE DEL ARCHIVO DE REFERENCIA
+	char 		*RefFastq		=	NULL;				//NOMBRE ARCHIVO FASTQ
+	char 		*RefFastqseq	=	NULL;				//NOMBRE ARCHIVO FASTQSEQ
+	char 		*RefAlign		=	NULL;				//NOMBRE ARCHIVO ALIGN
+	char 		*RefMeta		=	NULL;				//NOMBRE ARCHIVO META
 	int			TotalReads;								//TotalReads	=	BxC
 	long int 	TotalChars;								//Total de caracteres en la referencia
+	FILE 		*FASTQ, *FASTQSEQ,	*ALIGN,	*META;		//PUNTEROS A LOS ARCHIVOS
+	int 		MaxK;									//TOTAL DE ERRORES L*ERROR_PER
+	int			t;										//NÚMERO DE ELEMENTOS DE LA RULETA
+	double		dado;									//DADO
+
+	//VARIABLES CON RELACIÓN AL PROCESO DE MUTACIÓN
+	uint32_t 	Pos;            		//Posición de Matching respecto a la referencia
+    char      	strand;         		//Caractér con el sentido del matching
+    uint16_t  	*Offsets;       		//Arreglo de offsets por cada error 
+    uint8_t   	*Oper;          		//Arreglo con la operación por error   
+    uint8_t   	*BaseRef;       		//Arreglo con la base de la referencia (Read Referencia)
+    uint8_t   	*BaseRead;      		//Arreglo con la base después de la mutación (Read Destino) 
+    uint32_t  	id;             	 	//Identificador consecutivo para cada uno de los Reads
+    uint16_t  	lendesc;         		//Cantidad de errores total en el Read
+    uint16_t  	Cnts,CntS,Cnti,CntI;
+	uint16_t  	Cntd,CntD,CntT,CntC;    //Cantidad de veces que ocurre una mutación
 
 	//Obtener los datos suministrados en la linea de comando
 	if(argc>1){
 		for (int i = 1; i < argc; i++)	{
-			if (strcmp(argv[i], "-DATA") == 0)	
-				DATA	=	argv[i+1];
-			if (strcmp(argv[i], "-I") == 0)	
-				I	=	argv[i+1];
-			if (strcmp(argv[i], "-Q") == 0)	
-				Q	=	argv[i+1];	
-			if (strcmp(argv[i], "-L") == 0)
-				L	=	atoi(argv[i+1]);
-			if (strcmp(argv[i], "-C") == 0)	
-				C	=	atoi(argv[i+1]);
-			if (strcmp(argv[i], "-B") == 0)	
-				B	=	atoi(argv[i+1]);
-			if (strcmp(argv[i], "-E") == 0)	
-				E	=	atoi(argv[i+1]);
+			if (strcmp(argv[i], "-DATA")	== 0)	DATA	=	argv[i+1];
+			if (strcmp(argv[i], "-I")    	== 0)	I		=	argv[i+1];
+			if (strcmp(argv[i], "-Q") 		== 0)	Q		=	argv[i+1];	
+			if (strcmp(argv[i], "-L") 		== 0)	L		=	atoi(argv[i+1]);
+			if (strcmp(argv[i], "-C") 		== 0)	C		=	atoi(argv[i+1]);
+			if (strcmp(argv[i], "-B") 		== 0)	B		=	atoi(argv[i+1]);
+			if (strcmp(argv[i], "-E") 		== 0)	E		=	atoi(argv[i+1]);
+			if (strcmp(argv[i], "-P") 		== 0)	P		=	atoi(argv[i+1]);
+			if (strcmp(argv[i], "-lambda") 	== 0)	lambda	=	atof(argv[i+1]);	
 		}
 	}
 
 	//OBTENER EL NOMBRE DE LA SECUENCIA Y CREAR EL NOMBRE DE LOS ARCHIVOS DE SALIDA
-	Name	=	malloc(40*sizeof(char));
-	char *dot;
-	dot		=	strrchr(DATA,'.');
-	strncpy(Name,DATA,dot - DATA);
+	RefName		=	(char*)	malloc(40*sizeof(char));
+	RefFastq	=	(char*) malloc(40*sizeof(char));
+	RefFastqseq	=	(char*) malloc(40*sizeof(char));
+	RefAlign	=	(char*) malloc(40*sizeof(char));
+	RefMeta		=	(char*) malloc(40*sizeof(char));
 
-	//A. GENERAR ALEATORIAMENTE LA POSICIÓN DE MAPEO
-    //	1.SABER LA CANTIDAD DE CARACTERES DE LA REFERENCIA
-	TotalChars	=	contChars(DATA);
-	//		2.OBTENER LA REFERENCIA
+	char *dot	=	strrchr(DATA,'.');
+	strncpy(RefName,DATA,dot - DATA);
+
+	//CREAR Y ABRIR LOS ARCHIVOS DE SALIDA
+	strcpy(RefFastq,RefName);	strcpy(RefFastqseq,RefName);
+	strcpy(RefAlign,RefName);	strcpy(RefMeta,RefName);
+	FASTQ		=	fopen(strcat(RefFastq	,".fastq")		,"w");
+	FASTQSEQ	=	fopen(strcat(RefFastqseq,".fastqseq")	,"w");
+	ALIGN		=	fopen(strcat(RefAlign	,".align")		,"w");
+	META		=	fopen(strcat(RefName	,".meta")		,"w");
+
+	//SE LLENA EL ARCHIVO META
+	fprintf(META,"Nombre del archivo FASTA:	%s\n",DATA);
+	fprintf(META,"Identificador de los reads: %s\n",I);
+	fprintf(META,"Valor de los puntajes de calidad:	%s\n",Q);
+	fprintf(META,"Longitud de los reads: %d\n",L);
+	fprintf(META,"Valor del coverage: %d\n",C);
+	fprintf(META,"Valor de la base:	%d\n",B);
+	fprintf(META,"Valor de lambda:	%f\n",lambda);
+	if(E!=0){	fprintf(META,"Número predeterminado de errores:	%d\n",E);	}
+	else{		fprintf(META,"Sin número predeterminado de errores\n");		}
+	if(P==1){	fprintf(META,"Prueba especial, solo se consideran matchings tipo Forward and Reverse\n");	}
+	else{		fprintf(META,"Se consideran los cuatro tipos de matching\n");		}
+
+	/**
+	 * POR EL MOMENTO ASUMIREMOS QUE E Y P NUNCA OCURREN
+	*/
+	 
+	//ANTES DE COMENZAR, SE HALLA EL VECTOR DE PROBABILIDADES EXPONENCIALES Y DEMÁS VECTORES
+	//VECTOR PARA LOS MATCHING	{FORWARD, REVERSE, COMPLEMENT, REVERSE COMPLEMENT}
+	double		MatTypeStats[MATCHING_TYPES]   =   {0.4,0.4,0.1,0.1}; 
+	double 		MatTypeAcumF[MATCHING_TYPES];
+	double 		total_adaptMat	=	CalculaTotal(MATCHING_TYPES,MatTypeStats);
+	MatTypeAcumF[0]		= MatTypeStats[0] / total_adaptMat;
+	for (int i=1; i<MATCHING_TYPES; i++){
+		MatTypeAcumF[i]= (MatTypeStats[i] / total_adaptMat) + MatTypeAcumF[i-1];
+	}
+
+	//VECTOR DE PROBABILIDADES DE ERROR
+	MaxK    =   ERROR_PER   *   L;
+	double		*ErrorStat	=	(double*)	malloc(MaxK*sizeof(double));
+    t		=   AdjustKExp(ErrorStat,TINICIAL,lambda,MaxK);
+
+	//VECTOR DE PROBABILIDADES DE LAS MUTACIONES
+	//Simple Substitution, Single deletion, Insertion, Contiguos Deletion
+	//N Insertions, Triple Contiguos deletion, Contiguos Repeated Substitution
+	//Quadruple Contiguos deletion
+	double		MutTypeStats[MUTATION_TYPES]   =   {0.63,0.15,0.071,0.065,0.049,0.006,0.0009,0.0001}; 
+	double 		MutTypeAcumF[MUTATION_TYPES];
+	double		total_adaptMut	= CalculaTotal(MUTATION_TYPES,MutTypeStats);
+	MutTypeAcumF[0]		= MutTypeStats[0] / total_adaptMut;
+	for (int i=1; i<MUTATION_TYPES; i++){
+		MutTypeAcumF[i]= (MutTypeStats[i] / total_adaptMut) + MutTypeAcumF[i-1];
+	}
+	
+	TotalChars	=	contChars(DATA);				//CANTIDAD DE CARACTERES DE LA REFERENCIA
 	Reference	=	(char*) malloc(TotalChars*sizeof(char));
-	getReference(DATA,Reference);
-	TotalReads	=	B*C;				//Número total de Reads a generar
-	srand(time(NULL));
+	getReference(DATA,Reference);					//SE OBTIENE LA REFERENCIA
+	TotalReads	=	B*C;							//NUMERO TOTAL DE READS A GENERAR
+
+	srand(time(NULL));								//SEMILLA DE LOS ALEATOREOS
+
 	for(int ReadsCicle = 0;	ReadsCicle<TotalReads; ReadsCicle++){
-		//			3.GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
-		long int position = (rand() %((TotalChars-L) - 0 + 1)) + 0;
-		//				4.SACAR LA PORCIÓN DEL ARREGLO
-		char *Read	=	(char*) malloc((L+READ_BIAS)*sizeof(char));
-		memcpy(Read,Reference+position,L);
-		//printf("read length:	%ld\n",strlen(Read));
-		printf("Read:	%s\n",Read);
-			
+
+		id	=	ReadsCicle+1;
+		fprintf(ALIGN,"Read ID:	%"PRIu32"\n",id);
+
+		//B.GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
+		Pos		=	(rand() %((TotalChars-L) - 0 + 1)) + 0;
+		Read	=	(char*) malloc((L+READ_BIAS)*sizeof(char));
+		memcpy(Read,Reference+Pos,L+READ_BIAS);		//SE OBTIENE EL READ DE LA REFERENCIA
+		fprintf(ALIGN,"Referencia	:%s\n",Read);
 
 		//B.CALCULAR EL MATCHING
 		//ORDEN DE LOS ARREGLOS 
 		//FORWARD(F), REVERSE(R), COMPLEMENT(C), REVERSE COMPLEMENT(E)
-		double MatTypeStats[MATCHING_TYPES]   =   {0.4,0.4,0.1,0.1};  
-		double Acum_fun[MATCHING_TYPES];
+		dado 	= 	LanzarDado(1);											//LANZAR DADO
+		int MatTypeSel  =   BusqBin_Rul(MatTypeAcumF,MATCHING_TYPES,dado); 	//GIRAR LA RULETA
+		selMatching(MatTypeSel,L,Read,MT);									//APLICAR EL MATCHING
+		fprintf(ALIGN,"Matching Type:	%s\n",MT);
 
-		double total_adapt = CalculaTotal(MATCHING_TYPES,MatTypeStats);
-		Acum_fun[0]= MatTypeStats[0] / total_adapt;
-		for (int i=1; i<MATCHING_TYPES; i++){
-			Acum_fun[i]= (MatTypeStats[i] / total_adapt) + Acum_fun[i-1];
+		//C.CALCULAR LA CANTIDAD DE ERROES
+		dado	=	LanzarDado(ErrorStat[t-1]);
+		lendesc	=	BusqBin_Rul(ErrorStat,t,dado);
+		fprintf(ALIGN,"Cantidad de errores:	%"PRIu16"\n",lendesc);
+
+		if(lendesc	!=	0){
+			strand	=	tolower(*MT);
+			fprintf(ALIGN,"Match Perfecto del tipo %c\n",strand);
+			for(int i	=	0;	i<lendesc;	i++){
+
+			}
+		}else{
+			//EN ESTE CASO NO HAY ERRORES
+			strand	=	*MT;
+			fprintf(ALIGN,"Match Perfecto del tipo %c\n",strand);
+			fprintf(FASTQ,"@%s %d\n",I,id);
+			char	*FinalRead	=	(char*) malloc(L*sizeof(char));
+			memcpy(FinalRead,Read,L);
+			fprintf(FASTQ,"%s\n",FinalRead);
+			fprintf(FASTQ,"+\n");
+			for(int i	=	0;	i<L;	i++){
+				fprintf(FASTQ,"%s",Q);
+			}
+			fprintf(FASTQ,"\n\n");
+			fprintf(FASTQSEQ,"Read: %d, Secuencia:	%s\n",id,FinalRead);
 		}
 
-		//LANZAR EL DADO
-		double dado = LanzarDado();
-		printf("Dado	=	%f\n",dado);
-		//GIRAR LA RULETA
-		int MatTypeSel  =   BusqBin_Rul(Acum_fun,MATCHING_TYPES,dado);
-		printf("Matching Type	=	%d\n",MatTypeSel);
-		//APLICAR EL MATCHING
-		selMatching(MatTypeSel,L,Read,MT);
-		printf("Matching Type:	%s  ",MT);
-		printf("Match Read:	%s\n",Read);
-	}
+		fprintf(ALIGN,"\n");
+		free(Read);
 
-	free(Name);
+	}
+	
+
+	//LIBERAR ESPACIO DE MEMORIA
+	free(RefName);
+	free(RefFastq);
+	free(RefFastqseq);
+	free(RefAlign);
+	free(RefMeta);
 	free(Reference);
+
+	//CERRAR LOS ARCHIVOS
+	fclose(FASTQ);
+	fclose(FASTQSEQ);
+	fclose(ALIGN);
+	fclose(META);
 	return 0;
 }
 
@@ -207,15 +311,11 @@ void getReference(char *FileName, char *Reference){
                 case 0: if(c == '\n')	estado  =   1;	break;
                 case 1: if(c    !=  '\n'){  
 					switch(c){
-						case 'a':	Reference[j] = 'A'; break;
-						case 'A':	Reference[j]	= 'A'; break;
-						case 'c':	Reference[j] = 'C'; break;
-						case 'C':	Reference[j]	= 'C'; break;
-						case 'g':	Reference[j] = 'G'; break;
-						case 'G':	Reference[j]	= 'G'; break;
-						case 't':	Reference[j] = 'T'; break;
-						case 'T':	Reference[j]	= 'T'; break;
-						default:	Reference[j]	= 'N';
+						case 'a':	case 'A':	Reference[j] = 'A'; break;
+						case 'c':	case 'C':	Reference[j] = 'C'; break;
+						case 'g':	case 'G':	Reference[j] = 'G'; break;
+						case 't':	case 'T':	Reference[j] = 'T'; break;
+						default:				Reference[j]	= 'N';
 					} 
 					j++;
                 }   
@@ -225,6 +325,31 @@ void getReference(char *FileName, char *Reference){
 	}
 	fclose(pf);
 }
+
+//exp1	: Calcula el valor de la exponencial para un t en particular
+//@param: t 		:   t actual
+//@param: lambda	:   Valor ajustable, es la constante de la exponencial
+double exp1(int t , double lambda){
+    return (lambda*pow(EXP, (-1.0)*lambda*((double)t)));
+}
+
+//AdjustKExp: Iterar buscando que la suma de Pi, 0<=i<=k e aproxime más a 0.99999999
+//@param: start		: 	Valor inicial de t -> Suele ser cero (t es el número de elementos de la ruleta)
+//@param: lambda	:   Valor ajustable, es la constante de la exponencial
+//@param: MaxK 		:   Número máximo de errores de un read 
+int AdjustKExp(double *ErrorStat,int start, double lambda, int MaxK ){
+    
+    double    aux     	=   0.0;
+    int       auxt    		=   start;
+
+    while ((aux	<=	0.999999999)	&&	(auxt	<=	MaxK)){
+        aux	=	aux	+	exp1(auxt,lambda);
+		ErrorStat[auxt]	=	aux;
+        auxt++;
+    }      
+    return (auxt);
+}
+
 
 void selMatching(int MatTypeSel, int L, char *READ, char *MT){
 	switch(MatTypeSel){
@@ -285,8 +410,8 @@ double CalculaTotal(int n, double a[]){
 }
 
 //LanzarDado: devuelve un valor entre 0 y 1 aleatorio
-double LanzarDado(){
-    double dado = 0+(1-0)*rand()/((double)RAND_MAX);
+double LanzarDado(double LimiteS){
+    double dado = 0+(LimiteS-0)*rand()/((double)RAND_MAX);
     return dado;
 }
 
@@ -312,7 +437,7 @@ void ComplementRead(char *Read, long length){
 	int i;
 	for (i=0; i<length;i++){
 		switch(Read[i]){
-		    case 'A': Compl='T'; break;
+			case 'A': Compl='T'; break;
 		    case 'a': Compl='T'; break;
 		    case 'C': Compl='G'; break;
 		    case 'c': Compl='G'; break;
@@ -324,7 +449,6 @@ void ComplementRead(char *Read, long length){
 		    case 'n': Compl='N' ;break;
 		    default: printf ("**Error building the complement, wrong input base**");
 		}
-
 		Read[i]=Compl;
 	}
 
