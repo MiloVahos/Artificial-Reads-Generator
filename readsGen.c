@@ -1,11 +1,11 @@
 /*
- *  @Developer:     Juan Camilo Peña Vahos
+ *  @Developers:     Juan Camilo Peña Vahos	- Aníbal Guerra	- Sebastian Isaza Ramirez
  *  @Last Revised:  17/07/2018
  *  @Description:   Generador artificial de reads para simular casos de prueba del compresor.
  *
 */
 /*
- *	Todo: 	     	Inicializar Read usando memoria dinámica
+ *	Todo: 	     	
 */
 /*								ESTRUCTURA DE UN READ
  * LINEA 1: (IDENTIFICADOR) Siempre empieza con @
@@ -72,9 +72,10 @@ double 			LanzarDado(double);
 long int 		contChars(char*);
 void 			getReference(char*,char*);
 void			selMatching(int,int,char*,char*);
-int 			AdjustKExp(double*,int,double,int);
+int 			AdjustKExp(int,double,int);
+void			generarRuletaExp(double*,int,double);
 double 			exp1(int,double);
-
+uint8_t			selMutation(int);
 
 int main (int argc, char *argv[]) {	
     
@@ -162,6 +163,7 @@ int main (int argc, char *argv[]) {
 	fprintf(META,"Valor del coverage: %d\n",C);
 	fprintf(META,"Valor de la base:	%d\n",B);
 	fprintf(META,"Valor de lambda:	%f\n",lambda);
+	fflush(stdin);
 	if(E!=0){	fprintf(META,"Número predeterminado de errores:	%d\n",E);	}
 	else{		fprintf(META,"Sin número predeterminado de errores\n");		}
 	if(P==1){	fprintf(META,"Prueba especial, solo se consideran matchings tipo Forward and Reverse\n");	}
@@ -182,9 +184,11 @@ int main (int argc, char *argv[]) {
 	}
 
 	//VECTOR DE PROBABILIDADES DE ERROR
-	MaxK    =   ERROR_PER   *   L;
+	MaxK    =   (int)floor(ERROR_PER	*	L);
 	double		*ErrorStat	=	(double*)	malloc(MaxK*sizeof(double));
-    t		=   AdjustKExp(ErrorStat,TINICIAL,lambda,MaxK);
+    t		=   AdjustKExp(TINICIAL,lambda,MaxK);
+	generarRuletaExp(ErrorStat,t,lambda);
+
 
 	//VECTOR DE PROBABILIDADES DE LAS MUTACIONES
 	//Simple Substitution, Single deletion, Insertion, Contiguos Deletion
@@ -214,7 +218,6 @@ int main (int argc, char *argv[]) {
 		Pos		=	(rand() %((TotalChars-L) - 0 + 1)) + 0;
 		Read	=	(char*) malloc((L+READ_BIAS)*sizeof(char));
 		memcpy(Read,Reference+Pos,L+READ_BIAS);		//SE OBTIENE EL READ DE LA REFERENCIA
-		fprintf(ALIGN,"Referencia	:%s\n",Read);
 
 		//B.CALCULAR EL MATCHING
 		//ORDEN DE LOS ARREGLOS 
@@ -222,6 +225,7 @@ int main (int argc, char *argv[]) {
 		dado 	= 	LanzarDado(1);											//LANZAR DADO
 		int MatTypeSel  =   BusqBin_Rul(MatTypeAcumF,MATCHING_TYPES,dado); 	//GIRAR LA RULETA
 		selMatching(MatTypeSel,L,Read,MT);									//APLICAR EL MATCHING
+		fprintf(ALIGN,"Referencia: %s\n",Read);
 		fprintf(ALIGN,"Matching Type:	%s\n",MT);
 
 		//C.CALCULAR LA CANTIDAD DE ERROES
@@ -230,10 +234,26 @@ int main (int argc, char *argv[]) {
 		fprintf(ALIGN,"Cantidad de errores:	%"PRIu16"\n",lendesc);
 
 		if(lendesc	!=	0){
-			strand	=	tolower(*MT);
-			fprintf(ALIGN,"Match Perfecto del tipo %c\n",strand);
-			for(int i	=	0;	i<lendesc;	i++){
+			strand	=	(char) tolower(*MT);
+			fprintf(ALIGN,"Matching type %c\n",strand);
+			for(int i	=	0;	i<lendesc;	i++){	
 
+				Offsets		=   (uint16_t*) malloc(lendesc*sizeof(uint16_t));
+   				Oper        =   (uint8_t*)  malloc(lendesc*sizeof(uint8_t));
+				BaseRef		=	(uint8_t*)  malloc(lendesc*sizeof(uint8_t));
+				BaseRead	=	(uint8_t*)  malloc(lendesc*sizeof(uint8_t));
+				Cnts	=	0;	CntS	=	0;	Cntd	=	0;	CntD	=	0;
+				Cnti	=	0;	CntI	=	0;	CntT	=	0;	CntC	=	0;
+
+				fprintf(ALIGN,"Offset de la referencia: %"PRIu32"\n",Pos);
+				//Calcular el offset del error
+				Pos		=	(rand() %((L-lendesc) - 0 + 1)) + 0;
+
+
+				dado	=	LanzarDado(1);
+				int ErrorSel	=	BusqBin_Rul(MutTypeAcumF,MUTATION_TYPES,dado);
+				Oper[i]	=	selMutation(ErrorSel);
+				fprintf(ALIGN,"Operación de mutación: %c\n",Oper[i]);
 			}
 		}else{
 			//EN ESTE CASO NO HAY ERRORES
@@ -337,19 +357,27 @@ double exp1(int t , double lambda){
 //@param: start		: 	Valor inicial de t -> Suele ser cero (t es el número de elementos de la ruleta)
 //@param: lambda	:   Valor ajustable, es la constante de la exponencial
 //@param: MaxK 		:   Número máximo de errores de un read 
-int AdjustKExp(double *ErrorStat,int start, double lambda, int MaxK ){
+int AdjustKExp(int start, double lambda, int MaxK ){
     
     double    aux     	=   0.0;
-    int       auxt    		=   start;
+    int       auxt    	=   start;
 
-    while ((aux	<=	0.999999999)	&&	(auxt	<=	MaxK)){
+    while ((aux	<=	0.9998)	&&	(auxt	<=	MaxK)){
         aux	=	aux	+	exp1(auxt,lambda);
-		ErrorStat[auxt]	=	aux;
         auxt++;
     }      
     return (auxt);
 }
 
+void generarRuletaExp(double *ErrorStat,int t,double lambda){
+
+	double aux	=	0.0;
+	for(int i=0;	i<t;	i++){
+		aux	=	aux	+	exp1(i,lambda);
+		ErrorStat[i]	=	aux;
+	}
+
+}
 
 void selMatching(int MatTypeSel, int L, char *READ, char *MT){
 	switch(MatTypeSel){
@@ -452,4 +480,17 @@ void ComplementRead(char *Read, long length){
 		Read[i]=Compl;
 	}
 
+}
+
+uint8_t selMutation(int ErrorSel){
+	switch(ErrorSel){
+		case 0: return 's';	break;
+		case 1: return 'd'; break;
+		case 2: return 'i'; break;
+		case 3: return 'D'; break;
+		case 4: return 'I'; break;
+		case 5: return 'T'; break;
+		case 6: return 'S'; break; 
+		case 7: return 'C'; break;
+	}
 }

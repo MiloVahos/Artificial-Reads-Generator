@@ -38,22 +38,19 @@ int main (int argc, char *argv[]) {
 
 
     //ASUMMING READ LENGTH IS 50
-    unsigned int    L   =   50;
+    unsigned int    L   =   1024;
 	char *Read  =   (char*) malloc(L+READ_BIAS*sizeof(char));
     memcpy(Read,"GGGCGGCGACCTCGCGGGTTTTCGCTATTTATGAAAATTTTCCGGTTTAAGGCGTTTCCGTTCTTCTTCGTCATAACTTAATGTTTTTATTTAAAATACC",L+READ_BIAS);
 
     //Calcular la cantidad de errores del read
-    int MaxK        =   ERROR_PER   *   L;
+    int MaxK        =   (int) (ERROR_PER   *   L); //floor
+    printf("Maxk %d\n",MaxK);
     double lambda   =   0.0225;
     int start       =   0;
     int t           =   AdjustKExp(start,lambda,MaxK);
 
-    Offsets    =   (uint16_t*)   malloc(t*sizeof(uint16_t));
-    Oper       =   (uint8_t*)    malloc(t*sizeof(uint8_t));
-
-
     for(int i=0;    i<t;    i++){
-
+        
     }
 }
 
@@ -67,7 +64,7 @@ int AdjustKExp(int t, double P0, int MaxK ){
     int       auxt    =   t;
 
     //Iterar buscando que la suma de Pi, 0<=i<=k  se aproxime más a 0.99999999 y menor o igual que 1.0
-    while ((aux<=0.999999999)&&(auxt<=MaxK)){
+    while ((aux<=0.9998)&&(auxt<=MaxK)){
         aux=aux+exp_1(auxt , P0);
         auxt++;
         printf (" Acumulado en la iter %d es : %f  \n", auxt, aux);
