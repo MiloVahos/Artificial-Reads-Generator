@@ -1,5 +1,5 @@
 /*
- *  @Developers:     Juan Camilo Peña Vahos	- Aníbal Guerra	- Sebastian Isaza Ramirez
+ *  @Developers:    Juan Camilo Peña Vahos	- Aníbal Guerra	- Sebastian Isaza Ramirez
  *  @Last Revised:  17/07/2018
  *  @Description:   Generador artificial de reads para simular casos de prueba del compresor.
  *
@@ -68,7 +68,7 @@ void 			ReverseRead(char*,long);
 void 			ComplementRead(char*,long);
 int  			BusqBin_Rul(double[], int, double);
 double 			CalculaTotal(int,double[]);
-double 			LanzarDado(double);
+double 			LanzarDado();
 long int 		contChars(char*);
 void 			getReference(char*,char*);
 void			selMatching(int,int,char*,char*);
@@ -92,8 +92,8 @@ int main (int argc, char *argv[]) {
 
 
 	//VARIABLES DEL PROCESO PARA SALIDA
-	char	*MT		=	(char*) malloc(sizeof(char));	//MATCHING TYPE
-	char	*OTy	=	(char*) malloc(2*sizeof(char)); //OPERATION (MUTATION) TYPE
+	char	*MT		=	(char*) malloc(sizeof(char)); //MATCHING TYPE
+	char	*OTy	=	(char*) malloc(sizeof(char)); //OPERATION (MUTATION) TYPE
 
 	//VARIABLES DEL PROCESO PARA OPERAR
 	char		*Reference		=	NULL;				//REFERENCIA OBTENIDA DEL ARCHIVO FASTA
@@ -163,7 +163,7 @@ int main (int argc, char *argv[]) {
 	fprintf(META,"Valor del coverage: %d\n",C);
 	fprintf(META,"Valor de la base:	%d\n",B);
 	fprintf(META,"Valor de lambda:	%f\n",lambda);
-	fflush(stdin);
+
 	if(E!=0){	fprintf(META,"Número predeterminado de errores:	%d\n",E);	}
 	else{		fprintf(META,"Sin número predeterminado de errores\n");		}
 	if(P==1){	fprintf(META,"Prueba especial, solo se consideran matchings tipo Forward and Reverse\n");	}
@@ -216,26 +216,27 @@ int main (int argc, char *argv[]) {
 
 		//B.GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
 		Pos		=	(rand() %((TotalChars-L) - 0 + 1)) + 0;
+		fprintf(ALIGN,"Offset de la referencia: %"PRIu32"\n",Pos);
 		Read	=	(char*) malloc((L+READ_BIAS)*sizeof(char));
 		memcpy(Read,Reference+Pos,L+READ_BIAS);		//SE OBTIENE EL READ DE LA REFERENCIA
 
 		//B.CALCULAR EL MATCHING
 		//ORDEN DE LOS ARREGLOS 
 		//FORWARD(F), REVERSE(R), COMPLEMENT(C), REVERSE COMPLEMENT(E)
-		dado 	= 	LanzarDado(1);											//LANZAR DADO
+		dado 	= 	LanzarDado();											//LANZAR DADO
 		int MatTypeSel  =   BusqBin_Rul(MatTypeAcumF,MATCHING_TYPES,dado); 	//GIRAR LA RULETA
 		selMatching(MatTypeSel,L,Read,MT);									//APLICAR EL MATCHING
 		fprintf(ALIGN,"Referencia: %s\n",Read);
-		fprintf(ALIGN,"Matching Type:	%s\n",MT);
 
 		//C.CALCULAR LA CANTIDAD DE ERROES
-		dado	=	LanzarDado(ErrorStat[t-1]);
+		dado	=	LanzarDado();
 		lendesc	=	BusqBin_Rul(ErrorStat,t,dado);
 		fprintf(ALIGN,"Cantidad de errores:	%"PRIu16"\n",lendesc);
-
 		if(lendesc	!=	0){
 			strand	=	(char) tolower(*MT);
 			fprintf(ALIGN,"Matching type %c\n",strand);
+			int OffsetAcum	=	0;
+			int OffsetAux	=	0;
 			for(int i	=	0;	i<lendesc;	i++){	
 
 				Offsets		=   (uint16_t*) malloc(lendesc*sizeof(uint16_t));
@@ -245,15 +246,26 @@ int main (int argc, char *argv[]) {
 				Cnts	=	0;	CntS	=	0;	Cntd	=	0;	CntD	=	0;
 				Cnti	=	0;	CntI	=	0;	CntT	=	0;	CntC	=	0;
 
-				fprintf(ALIGN,"Offset de la referencia: %"PRIu32"\n",Pos);
 				//Calcular el offset del error
-				Pos		=	(rand() %((L-lendesc) - 0 + 1)) + 0;
-
-
-				dado	=	LanzarDado(1);
+				OffsetAux	=	(rand() %((L-lendesc+i) - (OffsetAcum+1) + 1)) + (OffsetAcum+1);
+				Offsets[i]	=	OffsetAux	-	OffsetAcum;
+				fprintf(ALIGN,"Offset[%d]	=	%d\n",i,Offsets[i]);
+				OffsetAcum	=	OffsetAux;
+				
+				//Determinar el tipo de error
+				dado	=	LanzarDado();
 				int ErrorSel	=	BusqBin_Rul(MutTypeAcumF,MUTATION_TYPES,dado);
 				Oper[i]	=	selMutation(ErrorSel);
 				fprintf(ALIGN,"Operación de mutación: %c\n",Oper[i]);
+
+				//Aplicar la mutación
+				if ((strand=='f')||(strand=='c')) { 
+
+				}else{
+
+				}
+
+				//Salida
 			}
 		}else{
 			//EN ESTE CASO NO HAY ERRORES
@@ -438,8 +450,8 @@ double CalculaTotal(int n, double a[]){
 }
 
 //LanzarDado: devuelve un valor entre 0 y 1 aleatorio
-double LanzarDado(double LimiteS){
-    double dado = 0+(LimiteS-0)*rand()/((double)RAND_MAX);
+double LanzarDado(){
+    double dado = 0+(1-0)*rand()/((double)RAND_MAX);
     return dado;
 }
 
@@ -494,3 +506,9 @@ uint8_t selMutation(int ErrorSel){
 		case 7: return 'C'; break;
 	}
 }
+
+void FordwardMutation(uint8_t Oper,char strand,char *Read,uint16_t Offset){
+
+}
+
+
