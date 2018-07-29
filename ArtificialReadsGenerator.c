@@ -4,47 +4,6 @@
  *  @Description:   Generador artificial de reads para simular casos de prueba del compresor.
  *
 */
-/*
- *	Todo: 	     	
-*/
-/*								ESTRUCTURA DE UN READ
- * LINEA 1: (IDENTIFICADOR) Siempre empieza con @
- * LINEA 2:	(SECUENCIA)		AGNTAGNTAGNT
- * LINEA 3:	(COMENTARIO)	Siempre empieza con +
- * LINEA 4:	(QUALITY SCORE)	Es un valor que entrega la máquina
- * 
- * NOTAS:
- * 		->EL QS SE GENERA CON UN SOLO VALOR QUE SE REPETIRÁ HASTA ALCANZAR LA MISMA
- * 		  LONGITUD QUE LA SECUENCIA
-*/
-/*                      PASOS DEL GENERADOR ARTIFICIAL DE READS
- *	1. Abrir y leer los diferentes tipos de archivos fasta y los argumentos de entrada
- * 	
- * 	ENTRADA: 
- * 		NOTA: 		SE DEBE RESPETAR ESTA NOTACIÓN
- * 
- * 		DATA	->	NOMBRE ARCHIVO DE EXTENSIÓN FASTA
- * 		I	  	->	IDENTIFICADOR PARA TODOS LOS READS, LOS DOS ÚLTIMOS NÚMEROS CAMBIAN DE 
- * 					FORMA ALEATORIA,TAMBIÉN ES EL ID DEL ARCHIVO .FASTQ
- *		Q		->	QUALITY SCORE PARA TODOS LOS ARCHIVOS
- * 		L		->	LONGITUD DE LOS READS
- * 		C		->	COVERAGE: ES INFORMACIÓN DE IMPORTANCIA BIOLÓGICA, NO PARA NOSOTROS
- * 		B		->	BASE DE READS: EL TOTAL DE READS A GENERAR SERÁ BxC 
- * 		E		-> 	CANTIDAD DE ERRORES DE CADA READ, DEBE SER MENOR QUE LA LONGITUD
- * 		P		->	ES UNA BANDERA, SI ESTÁ ACTIVADA, ENTONCES SOLO SE CONSIDERAN DOS TIPOS
- * 					DE MATCHING, FORWARD AND REVERSE EQUIPROBABLES DE SUCEDER (OPCIONAL)
- * 		lambda	->	VALOR AJUSTABLE PARA MODIFICAR LA FUNCIÓN EXPONENCIAL
-*/
-/*
- * 	SALIDA DEL PROGRAMA:
- * 		1. ARCHIVO .fastq CON BXC READS
- * 		2. ARCHIVO .fastqseq CON LAS SECUENCIAS DE CADA READ,UNA POR LÍNEA
- * 		3. ARCHIVO .aling CONTIENE POR READ LOS DATOS DEL MATCHING DEL READ Y TODOS LOS DATOS
- * 						  DE LOS ERRORES
- * 		4. ARCHIVO .meta CONTIENE LOS METADATOS DEL EXPERIMENTO,LOS QUE SE PASAN POR LA CONSOLA
- * 					     Y ALGUNOS QUE SE GENERAN EN EL TRANSCURSO DE LA EJECUCACIÓN COMO LOS
- * 						 NOMBRES DE LOS ARCHIVOS ANTERIORES
-*/ 
 
 //LIBRERÍAS
 #include <stdio.h>
@@ -54,27 +13,20 @@
 #include <math.h>
 #include <inttypes.h>
 
+#include "Mutations.h"
+#include "Matchings.h"
+#include "Stats.h"
+
 //DECLARACIÓN DE CONSTANTES
 
-#define MATCHING_TYPES 	4		//NÚMERO DE MATCHINGS POSIBLES
 #define MUTATION_TYPES	8		//NÚMERO DE MUTACIONES POSIBLES
-#define EXP 			2.71828	//VALOR DEL NÚMERO e
 #define READ_BIAS		50		//SE OBTIENEN ALGUNAS BASES EXTRAS PARA OPERAR 
 #define ERROR_PER   	0.25    //PORCENTAJE DE ERRORES EN EL READ
-#define TINICIAL		0		//VALOR INICIAL DE t
 
 //DECLARACIÓN DE FUNCIONES
-void 			ReverseRead(char*,long);
-void 		ComplementRead(char*,long);
-int  		BusqBin_Rul(double[], int, double);
-double 		CalculaTotal(int,double[]);
-double 		LanzarDado();
 long int 	contChars(char*);
 void 		getReference(char*,char*);
 void		selMatching(int,int,char*,char*);
-int 		AdjustKExp(int,double,int);
-void		generarRuletaExp(double*,int,double);
-double 		exp1(int,double);
 uint8_t		selMutation(int);
 char 		selBase(int,char);
 void 		FordwardMutation(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,uint32_t);
@@ -365,38 +317,6 @@ void getReference(char *FileName, char *Reference){
 	fclose(pf);
 }
 
-//exp1	: Calcula el valor de la exponencial para un t en particular
-//@param: t 		:   t actual
-//@param: lambda	:   Valor ajustable, es la constante de la exponencial
-double exp1(int t , double lambda){
-    return (lambda*pow(EXP, (-1.0)*lambda*((double)t)));
-}
-
-//AdjustKExp: Iterar buscando que la suma de Pi, 0<=i<=k e aproxime más a 0.99999999
-//@param: start		: 	Valor inicial de t -> Suele ser cero (t es el número de elementos de la ruleta)
-//@param: lambda	:   Valor ajustable, es la constante de la exponencial
-//@param: MaxK 		:   Número máximo de errores de un read 
-int AdjustKExp(int start, double lambda, int MaxK ){
-    
-    double    aux     	=   0.0;
-    int       auxt    	=   start;
-
-    while ((aux	<=	0.9998)	&&	(auxt	<=	MaxK)){
-        aux	=	aux	+	exp1(auxt,lambda);
-        auxt++;
-    }      
-    return (auxt);
-}
-
-void generarRuletaExp(double *ErrorStat,int t,double lambda){
-
-	double aux	=	0.0;
-	for(int i=0;	i<t;	i++){
-		aux	=	aux	+	exp1(i,lambda);
-		ErrorStat[i]	=	aux;
-	}
-
-}
 
 void selMatching(int MatTypeSel, int L, char *READ, char *MT){
 	switch(MatTypeSel){
@@ -420,86 +340,7 @@ void selMatching(int MatTypeSel, int L, char *READ, char *MT){
 	}
 }
 
-//BusqBin_Rul: función que utiliza el procedimiento de la Busq. Binaria
-//             para ubicar el elemento seleccionado a través del mecanismo
-//	            de la ruleta
-//@param: double prob[] : vector de probabilidades acumuladas
-//@param: n :   número de elementos en prob[]
-//@param: x :   resultado de lanzar los dados (es decir, usar rand para generar un número)
-int BusqBin_Rul(double prob[], int n, double x){
 
-	int primero,ultimo,central;
-	short encontrado;
-    primero     =   0;
-    ultimo      =   n-1;
-    encontrado  =   0;
-	while ((primero <= ultimo) && (encontrado==0)){
-   	    central = (primero + ultimo)/2;
-        if      (x  ==   prob[central]) encontrado = 1;
-        else if (x  >    prob[central]) primero = central + 1;
-        else                            ultimo = central - 1;
-        //printf("primer %d\n",primero);
-        //printf("ultimo %d\n",ultimo);
-   }
-   return(primero);
-}
-
-//CalculaTotal: Calculo de la Sumatoria de las Func. Aadaptación
-//              de cada Individuo de la Poblacion.
-//@param: a[] : vector de probabilidades de cada individuo, sin acumular
-//@param: n :   número de elementos en a[]
-double CalculaTotal(int n, double a[]){
-
-	int i;
-	double aux=0;
-    for (i=0;i<n;i++) {	aux = aux + a[i];}
-	return aux;
-}
-
-//LanzarDado: devuelve un valor entre 0 y 1 aleatorio
-double LanzarDado(){
-    double dado = 0+(1-0)*rand()/((double)RAND_MAX);
-    return dado;
-}
-
-//ReverseRead:	Implementa el inversor de reads
-//@param:	char *Read	:	Arreglo con el Read
-//@param:	long length	:	Longitud del Read
-void ReverseRead(char *Read, long length){
-	char aux;
-    int resto = length%2;
-	for (int i=0; i<length/2;i++){
-        //printf("READI = %c , READLEN = %c, i =  %d, resto = %d\n",Read[i],Read[length-i-1], i, length-i-1);
-		aux=Read[length-i-1];
-		Read[length-i-1]=Read[i];
-		Read[i]=aux;
-	}
-}
-
-//ComplementRead:	Implementa el complementador de reads (T,A)(C,G)
-//@param:	char *Read	:	Arreglo con el Read
-//@param:	long length	:	Longitud del Read
-void ComplementRead(char *Read, long length){
-	char Compl;
-	int i;
-	for (i=0; i<length;i++){
-		switch(Read[i]){
-			case 'A': Compl='T'; break;
-		    case 'a': Compl='T'; break;
-		    case 'C': Compl='G'; break;
-		    case 'c': Compl='G'; break;
-		    case 'G': Compl='C'; break;
-		    case 'g': Compl='C'; break;
-		    case 'T': Compl='A'; break;
-		    case 't': Compl='A'; break;
-		    case 'N': Compl='N'; break; 
-		    case 'n': Compl='N' ;break;
-		    default: printf ("**Error building the complement, wrong input base**");
-		}
-		Read[i]=Compl;
-	}
-
-}
 
 uint8_t selMutation(int ErrorSel){
 	switch(ErrorSel){
