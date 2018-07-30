@@ -29,7 +29,7 @@ void 		getReference(char*,char*);
 void		selMatching(int,int,char*,char*);
 uint8_t		selMutation(int);
 char 		selBase(int,char);
-void 		FordwardMutation(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,uint32_t);
+void 		FordwardMutation(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,FILE*,int*);
 
 int main (int argc, char *argv[]) {	
     
@@ -63,6 +63,7 @@ int main (int argc, char *argv[]) {
 	int 		MaxK;									//TOTAL DE ERRORES L*ERROR_PER
 	int			t;										//NÚMERO DE ELEMENTOS DE LA RULETA
 	double		dado;									//DADO
+	int			*ContBases		=	NULL;				//CONTADOR DE BASES, PARA SABER LA SIGUIENTE POSICIÓN	
 
 	//VARIABLES CON RELACIÓN AL PROCESO DE MUTACIÓN
 	uint32_t 	Pos;            		//Posición de Matching respecto a la referencia
@@ -149,7 +150,7 @@ int main (int argc, char *argv[]) {
 	//N Insertions, Triple Contiguos deletion, Contiguos Repeated Substitution
 	//Quadruple Contiguos deletion
 	//double		MutTypeStats[MUTATION_TYPES]   =   {0.63,0.15,0.071,0.065,0.049,0.006,0.0009,0.0001};
-	double		MutTypeStats[MUTATION_TYPES]	=	{1,0,0,0,0,0,0,0} ;
+	double		MutTypeStats[MUTATION_TYPES]	=	{0.5,0,0,0,0,0,0.5,0} ;
 	double 		MutTypeAcumF[MUTATION_TYPES];
 	double		total_adaptMut	= CalculaTotal(MUTATION_TYPES,MutTypeStats);
 	MutTypeAcumF[0]		= MutTypeStats[0] / total_adaptMut;
@@ -187,26 +188,31 @@ int main (int argc, char *argv[]) {
 		dado	=	LanzarDado();
 		lendesc	=	BusqBin_Rul(ErrorStat,t,dado);
 		fprintf(ALIGN,"Cantidad de errores:	%"PRIu16"\n",lendesc);
+
 		if(lendesc	!=	0){
 			strand	=	(char) tolower(*MT);
 			fprintf(ALIGN,"Matching type %c\n",strand);
 			int OffsetAcum	=	0;
 			int OffsetAux	=	0;
-			for(int i	=	0;	i<lendesc;	i++){	
 
-				Offsets		=   (uint16_t*) malloc(lendesc*sizeof(uint16_t));
-   				Oper        =   (uint8_t*)  malloc(lendesc*sizeof(uint8_t));
-				BaseRef		=	(uint8_t*)  malloc(lendesc*sizeof(uint8_t));
-				BaseRead	=	(uint8_t*)  malloc(lendesc*sizeof(uint8_t));
-				Cnts	=	0;	CntS	=	0;	Cntd	=	0;	CntD	=	0;
-				Cnti	=	0;	CntI	=	0;	CntT	=	0;	CntC	=	0;
+			Offsets		=   (uint16_t*) malloc(lendesc*sizeof(uint16_t));
+   			Oper        =   (uint8_t*)  malloc(lendesc*sizeof(uint8_t));
+			BaseRef		=	(uint8_t*)  malloc(3*lendesc*sizeof(uint8_t));
+			BaseRead	=	(uint8_t*)  malloc(3*lendesc*sizeof(uint8_t));
+			ContBases	=	(int*)		malloc(sizeof(int));
+			ContBases	=	0;
+			Cnts	=	0;	CntS	=	0;	Cntd	=	0;	CntD	=	0;
+			Cnti	=	0;	CntI	=	0;	CntT	=	0;	CntC	=	0;
 
-				
-				
-				//Determinar el tipo de error
-				dado	=	LanzarDado();
+			//GENERAR EL VECTOR DE MUTACIONES A APLICAR
+			for(int i=0;	i<lendesc;	i++){
+				dado			=	LanzarDado();
 				int ErrorSel	=	BusqBin_Rul(MutTypeAcumF,MUTATION_TYPES,dado);
-				Oper[i]	=	selMutation(ErrorSel);
+				Oper[i]			=	selMutation(ErrorSel);
+			}
+
+			for(int i=0;	i<lendesc;	i++){	
+								
 				fprintf(ALIGN,"Operación de mutación: %c\n",Oper[i]);
 
 				//Aplicar la mutación
@@ -216,16 +222,16 @@ int main (int argc, char *argv[]) {
 					Offsets[i]	=	OffsetAux	-	OffsetAcum;
 					fprintf(ALIGN,"Offset[%d]	=	%d\n",i,Offsets[i]);
 					OffsetAcum	=	OffsetAux;
-					FordwardMutation(Oper[i],Read,OffsetAux,BaseRef,BaseRead,id);
-					fprintf(ALIGN,"SECUENCE: %s\n",Read);
-					fprintf(ALIGN,"Base referece %c",BaseRef[id-1]);
-					fprintf(ALIGN,"Base read: %c",BaseRead[id-1]);
+					FordwardMutation(Oper[i],Read,OffsetAux,BaseRef,BaseRead,ALIGN,ContBases);
 				}else{
 					//RevereseMutation();
 				}
-
-				//Salida
 			}
+			free(Offsets);
+			free(BaseRef);
+			free(Read);
+			free(Oper);
+			free(ContBases);
 		}else{
 			//EN ESTE CASO NO HAY ERRORES
 			strand	=	*MT;
@@ -317,7 +323,6 @@ void getReference(char *FileName, char *Reference){
 	fclose(pf);
 }
 
-
 void selMatching(int MatTypeSel, int L, char *READ, char *MT){
 	switch(MatTypeSel){
 		case 0:                     //FORWARD MATCH
@@ -339,8 +344,6 @@ void selMatching(int MatTypeSel, int L, char *READ, char *MT){
 		default:    printf ("**Error in the matching selection, wrong input base**");
 	}
 }
-
-
 
 uint8_t selMutation(int ErrorSel){
 	switch(ErrorSel){
@@ -392,7 +395,7 @@ char selBase(int sel,char Base){
 	}
 }
 
-void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,uint8_t *BaseRead,uint32_t id){
+void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,uint8_t *BaseRead, FILE *ALIGN, int *ContBases){
 
 	//VECTOR DE PROBABILIDADES DE LAS BASES PARA LAS SUBSTITUCIONES
 	double	BasesStats[4]	=	{0.3,0.3,0.3,0.1};
@@ -402,20 +405,47 @@ void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,
 	switch((char)Oper){
 		
 		case 's':
-			
+				
 			BasesAcum[0]		= 	BasesStats[0] / total_adaptBases;
 			for (int i=1; i<4; i++){
 				BasesAcum[i]= (BasesStats[i] / total_adaptBases) + BasesAcum[i-1];
 			}
-			BaseRef[id-1]	=	Read[Offset];
+			BaseRef[*ContBases]	=	Read[Offset];
 			//Calcular la base destino
 			double dado		=	LanzarDado();
-			int sel	=	BusqBin_Rul(BasesAcum,4,dado);
-			char BaseDest			=	selBase(sel,Read[Offset]);
-			BaseRead[id-1]	=	BaseDest;
+			int sel			=	BusqBin_Rul(BasesAcum,4,dado);
+			char BaseDest	=	selBase(sel,Read[Offset]);
+			BaseRead[*ContBases]	=	BaseDest;
 			Read[Offset]	=	BaseDest;
+			fprintf(ALIGN,"SECUENCE: %s\n",Read);
+			fprintf(ALIGN,"Base referece %c\n",BaseRef[*ContBases]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[*ContBases]);
+			*ContBases++;
+
+		break;
+		case 'S':
+			BasesAcum[0]		= 	BasesStats[0] / total_adaptBases;
+			for (int i=1; i<4; i++){
+				BasesAcum[i]= (BasesStats[i] / total_adaptBases) + BasesAcum[i-1];
+			}
+			int flag = 0;
+			do{
+				double dado		=	LanzarDado();
+				int sel			=	BusqBin_Rul(BasesAcum,4,dado);
+				char BaseDest	=	selBase(sel,Read[Offset]);
+				if(BaseDest != Read[Offset+1]){ flag = 1; }
+			}while(flag != 1);
+			BaseRef[*ContBases]		=	Read[Offset];
+			BaseRef[*ContBases+1]	=	Read[Offset+1];
+			BaseRead[*ContBases]	=	BaseDest;
+			BaseRead[*ContBases+1]	=	BaseDest;
+			Read[Offset]	=	BaseDest;
+			Read[Offset+1]	=	BaseDest;
+			fprintf(ALIGN,"SECUENCE: %s\n",Read);
+			fprintf(ALIGN,"Bases referece %c%c\n",BaseRef[*ContBases],BaseRef[*ContBases+1]);
+			fprintf(ALIGN,"Base read: %c%c\n",BaseRead[*ContBases],BaseRead[*ContBases+1]);
+			*ContBases	=	*ContBases+2;
 		break;
 	}
-
 }
 

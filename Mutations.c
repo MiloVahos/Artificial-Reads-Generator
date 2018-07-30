@@ -8,6 +8,4 @@
 
 void simpleSubstitution(char *Read, int Offset){
 
-    
-
 }

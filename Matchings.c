@@ -4,6 +4,7 @@
  *  @Description:   Módulo para las funciones que aplican los matching
 */ 
 
+#include <stdio.h>
 #include "Matchings.h"
 
 //ReverseRead:	Implementa el inversor de reads
@@ -46,3 +47,4 @@ void ComplementRead(char *Read, long length){
 		}
 		Read[i]=Compl;
 	}
+}
