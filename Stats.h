@@ -1,8 +1,12 @@
 /*
- *  @Developers:    Juan Camilo Peña Vahos	- Aníbal Guerra	- Sebastian Isaza Ramirez
- *  @Last Revised:  28/07/2018
- *  @Description:   Módulo para las funciones estadísticas
-*/ 
+ ============================================================================
+ Name        : 	Stats.h
+ Author      : 	Juan Camilo Peña Vahos - Aníbal Guerra - Sebastian Isaza Ramírez
+ Version     :
+ Copyright   : 	This project is totally opensource
+ Description :	Archivo de cabecera para las funciones que dan soporte a la parte estadística
+ ============================================================================
+ */
 
 #ifndef STATS_H
 #define STATS_H
