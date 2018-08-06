@@ -13,8 +13,13 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-long int 	contChars	(char*);
-void 		getReference(char*,char*);
-void		generateRead(char*,uint32_t,int,char*,char*,FILE*,FILE*);
+#define LINE_LENGTH 1024
+#define CHRM_LENGTH 1024
+
+uint64_t 	contChars		(char*);
+void 		getReference	(char*,char*);
+void		generateRead	(char*,uint32_t,int,char*,char*,FILE*,FILE*);
+void		printCounters	(FILE*,uint16_t*);
+//char 		*load_reference	(char*,int);
 
 #endif
