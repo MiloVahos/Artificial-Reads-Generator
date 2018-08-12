@@ -21,12 +21,12 @@
 #include "Mutation.h"
 #include "FilesUtils.h"
 
-#define READ_BIAS		100		//SE OBTIENEN ALGUNAS BASES EXTRAS PARA OPERAR
+#define READ_BIAS		250		//SE OBTIENEN ALGUNAS BASES EXTRAS PARA OPERAR
 #define ERROR_PER   	0.25    //PORCENTAJE DE ERRORES EN EL READ
 #define NAMES_SIZE		40		//ESPACIO PARA EL NOMBRE DE LOS ARCHIVOS
 
 void FordwardMutation	(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
-int ReverseMutation		(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
+void ReverseMutation	(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
 
 int main(int argc, char *argv[]) {
 
@@ -275,77 +275,61 @@ int main(int argc, char *argv[]) {
 						case 'C': operShift-=4; break;
 					}
 				}
-				printf("%d ",OffsetAux);
 				OffsetAnt	=	OffsetAux;
 			}
-			printf("\n");
-			for(int i=0; i<lendesc; i++){
-				printf("%c ",Oper[i]);
-			}
-			printf("matching : %c =>",strand);
-			for(int i=0; i<lendesc; i++){
-				printf("%d ",Offsets[i]);
-			}
-			printf("\n");
+
+			//SE INICIALIZAN LOS ARREGLOS
+			BaseRef		=	(uint8_t*)  malloc((lendesc)*sizeof(uint8_t));
+			if (BaseRef	==	NULL) printf ("Not enough memory for BaseRef");
+			BaseRead	=	(uint8_t*)  malloc((lendesc)*sizeof(uint8_t));
+			if (BaseRead ==	NULL) printf ("Not enough memory for BaseRead");
+
 			int BaseActual	=	0;
+			OffsetAnt	=	0;
 
-			/*for(int i=0; i<lendesc;	i++){
-
-				//SE INICIALIZAN LOS ARREGLOS
-
-				BaseRef		=	(uint8_t*)  malloc((lendesc+operShift)*sizeof(uint8_t));
-				if (BaseRef	==	NULL) printf ("Not enough memory for BaseRef");
-				BaseRead	=	(uint8_t*)  malloc((lendesc+operShift)*sizeof(uint8_t));
-				if (BaseRead ==	NULL) printf ("Not enough memory for BaseRead");
+			for(int i=0; i<lendesc;	i++){
 
 				fprintf(ALIGN,"Operación de mutación: %c\n",Oper[i]);
 				//EL OFFSET SE GENERA DE ACUERDO AL TIPO DE MATCHING, FORWARD OR REVERSE
 				if ((strand	==	'f')||(strand	==	'c')) {
 					//FORWARD MATCHINGS
-					if(i==0){
-						OffsetAux 	= 	rand() %(((L-1)-lendesc-operShift) + 1 - 0) + 0;
-						Offsets[i]	=	OffsetAux;
-					}else{
-						OffsetAux	=	rand() %(((L-1)-(lendesc-i)-operShift) + 1 - (OffsetAnt+1)) + (OffsetAnt+1);
-						Offsets[i]	=	OffsetAux	-	OffsetAnt;
-					}
 					fprintf(ALIGN,"Offset[%d]	=	%d\n",i,Offsets[i]);
-					OffsetAnt	=	OffsetAux;
-					//APLICAR LA MUTACIÓN
-					FordwardMutation(Oper[i],Read,OffsetAux,BaseRef,BaseRead,L,BaseActual,ALIGN);
-					BaseActual++;
-
+					if(i==0){
+						//APLICAR LA MUTACIÓN
+						//printf("Oper = %c, Offset = %d, L = %d, Base = %d\n",Oper[i],Offsets[0],L,BaseActual);
+						FordwardMutation(Oper[i],Read,Offsets[0],BaseRef,BaseRead,L,BaseActual,ALIGN);
+						OffsetAnt	=	Offsets[0];
+					}else{
+						//APLICAR LA MUTACIÓN
+						//printf("Oper = %c, Offset = %d, L = %d, Base = %d\n",Oper[i],OffsetAnt+Offsets[i],L,BaseActual);
+						FordwardMutation(Oper[i],Read,(OffsetAnt+Offsets[i]),BaseRef,BaseRead,L,BaseActual,ALIGN);
+						OffsetAnt	= OffsetAnt+Offsets[i];
+					}
 				}else{
 					//REVERSE MATCHINGS
+					fprintf(ALIGN,"Offset[%d]	=	%d\n",i,Offsets[i]);
 					if(i==0){
-						OffsetAux2 = rand() %((L-1) + 1 - (0+lendesc+operShift)) + (0+lendesc+operShift);
-						Offsets[i]	=	OffsetAux2;
+						//APLICAR LA MUTACIÓN
+						ReverseMutation(Oper[i],Read,Offsets[0],BaseRef,BaseRead,L,BaseActual,ALIGN);
+						OffsetAnt	=	Offsets[0];
 					}else{
-						OffsetAux2 = rand() %((OffsetAnt2-1) + 1 - (0+(lendesc-i)+operShift)) + (0+(lendesc-i)+operShift);
-						Offsets[i]	=	OffsetAnt2 - OffsetAux2;
+						//APLICAR LA MUTACIÓN
+						ReverseMutation(Oper[i],Read,(OffsetAnt-Offsets[i]),BaseRef,BaseRead,L,BaseActual,ALIGN);
+						OffsetAnt	= OffsetAnt-Offsets[i];
 					}
-					fprintf(ALIGN,"Offset[%d]	=	%"PRIu16"\n",i,Offsets[i]);
-					OffsetAnt2	=	OffsetAux2;
-
-					//APLICAR LA MUTACIÓN
-					//BaseActual = ReverseMutation(Oper[i],Read,OffsetAux2,BaseRef,BaseRead,L,BaseActual,ALIGN);
-
 				}
-
-				//ACTUALIZAR LOS PARÁMETRO DEL CÁLCULO DEL OFFSET
-
-				if(BaseRef)		free(BaseRef);
-				if(BaseRead)	free(BaseRead);
-			}*/
+				BaseActual++;
+			}
+			if(BaseRef)		free(BaseRef);
+			if(BaseRead)	free(BaseRead);
 
 			//IMPRIMIR LOS CONTADORES
 			printCounters(ALIGN,Cnt);
 			//GENERAR EL READ
 			generateRead(Read,id,L,Q,I,FASTQ,FASTQSEQ);
-			printf("\n");
 			if(Oper)	free(Oper);
 			if(Cnt)		free(Cnt);
-			if(Offsets)		free(Offsets);
+			if(Offsets)	free(Offsets);
 		}else{
 			//EN ESTE CASO NO HAY ERRORES
 			//COMO NO HAY ERRORES EL MATCHING SE REPRESENTA EN MAYÚSCULA Y ES PERFECTO
@@ -382,8 +366,8 @@ void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,
  	//VECTOR DE PROBABILIDADES DE LAS BASES PARA LAS SUBSTITUCIONES
 	double	BasesStats[4]	=	{0.3,0.3,0.3,0.1};
 	double 	BasesAcum[4];
- 	switch((char)Oper){
 
+ 	switch((char)Oper){
 		case 's':
 			BasesAcum[0]		= 	BasesStats[0];
 			for (int i=1; i<4; i++){
@@ -395,7 +379,6 @@ void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,
 			int sel	=	BusqBin_Rul(BasesAcum,4,dado);
 			char BaseDest			=	selBase(sel,Read[Offset]);
 
-			printf("Offset	=	%d, BaseActual	=	%d\n",Offset,BaseActual);
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	Read[Offset];
 			BaseRead[BaseActual]	=	BaseDest;
@@ -407,7 +390,7 @@ void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
 
 		break;
-		/*case 'd':
+		case 'd':
 
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	Read[Offset];
@@ -442,27 +425,26 @@ void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	Read[Offset];
 			BaseRead[BaseActual]	=	'0';
-			BaseRef[BaseActual+1] 	=	Read[Offset+1];
-			BaseRead[BaseActual+1]	=	'0';
 			for(int q=Offset;q<L-2;q++){
 				Read[q] = Read[q+2];
 			}
 
 			//IMPRIMIR RESULTADOS
-			fprintf(ALIGN,"Base reference %c%c\n",BaseRef[BaseActual],BaseRef[BaseActual+1]);
-			fprintf(ALIGN,"Base read: %c%c\n",BaseRead[BaseActual],BaseRead[BaseActual+1]);
+			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
 
 		break;
 		case 'I':
 
+			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
+			BaseRef[BaseActual] 	=	'0';
+			BaseRead[BaseActual]	=	Read[Offset];
+
 			for(int q=(L-1);q>Offset;q--){
 				Read[q]	=	Read[q-1];
 			}
 			Read[Offset]	=	'N';
-			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
-			BaseRef[BaseActual] 	=	'0';
-			BaseRead[BaseActual]	=	Read[Offset];
 
 			//IMPRIMIR RESULTADOS
 			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
@@ -474,20 +456,16 @@ void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	Read[Offset];
 			BaseRead[BaseActual]	=	'0';
-			BaseRef[BaseActual+1] 	=	Read[Offset+1];
-			BaseRead[BaseActual+1]	=	'0';
-			BaseRef[BaseActual+2] 	=	Read[Offset+2];
-			BaseRead[BaseActual+2]	=	'0';
 			for(int q=Offset;q<L-3;q++){
 				Read[q] = Read[q+3];
 			}
 
 			//IMPRIMIR RESULTADOS
-			fprintf(ALIGN,"Base reference %c%c%c\n",BaseRef[BaseActual],BaseRef[BaseActual+1],BaseRef[BaseActual+2]);
-			fprintf(ALIGN,"Base read: %c%c%c\n",BaseRead[BaseActual],BaseRead[BaseActual+1],BaseRead[BaseActual+2]);
+			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
 
-		break;*/
+		break;
 		case 'S':
 
 			BasesAcum[0]		= 	BasesStats[0];
@@ -511,38 +489,33 @@ void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,
 					Read[Offset+1]	=	BaseDest;
 					flag = 1;
 				}
+
 			}while(flag != 1);
 
 
-			fprintf(ALIGN,"Bases reference %c%c\n",BaseRef[BaseActual],BaseRef[BaseActual+1]);
-			fprintf(ALIGN,"Base read: %c%c\n",BaseRead[BaseActual],BaseRead[BaseActual+1]);
+			fprintf(ALIGN,"Bases reference %c\n",BaseRef[BaseActual]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
 
 		break;
-		/*case 'C':
+		case 'C':
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	Read[Offset];
 			BaseRead[BaseActual]	=	'0';
-			BaseRef[BaseActual+1] 	=	Read[Offset+1];
-			BaseRead[BaseActual+1]	=	'0';
-			BaseRef[BaseActual+2] 	=	Read[Offset+2];
-			BaseRead[BaseActual+2]	=	'0';
-			BaseRef[BaseActual+3] 	=	Read[Offset+3];
-			BaseRead[BaseActual+3]	=	'0';
+
 			for(int q=Offset;q<L-4;q++){
 				Read[q] = Read[q+4];
 			}
 
 			//IMPRIMIR RESULTADOS
-			fprintf(ALIGN,"Base reference %c%c%c%c\n",BaseRef[BaseActual],BaseRef[BaseActual+1],BaseRef[BaseActual+2],BaseRef[BaseActual+3]);
-			fprintf(ALIGN,"Base read: %c%c%c%c\n",BaseRead[BaseActual],BaseRead[BaseActual+1],BaseRead[BaseActual+2],BaseRead[BaseActual+3]);
+			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
-		break;*/
+		break;
 	}
  }
 
-int ReverseMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,uint8_t *BaseRead, int L, int BaseActual, FILE *ALIGN){
+void ReverseMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,uint8_t *BaseRead, int L, int BaseActual, FILE *ALIGN){
  	//VECTOR DE PROBABILIDADES DE LAS BASES PARA LAS SUBSTITUCIONES
 	double	BasesStats[4]	=	{0.3,0.3,0.3,0.1};
 	double 	BasesAcum[4];
@@ -569,7 +542,6 @@ int ReverseMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,ui
 			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
 
-			return (BaseActual+1);
 		break;
 		case 'd':
 
@@ -586,14 +558,13 @@ int ReverseMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,ui
 			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
 
-			return (BaseActual+1);
 		break;
 		case 'i':
 
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	'0';
 			BaseRead[BaseActual]	=	Read[Offset];
-			for(int q=(L-1);q>Offset;q--){
+			for(int q=(L-1);q>Offset+1;q--){
 				Read[q]	=	Read[q-1];
 			}
 
@@ -601,63 +572,49 @@ int ReverseMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,ui
 			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
 			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
-			return (BaseActual+1);
 		break;
 		case 'D':
 
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	Read[Offset];
 			BaseRead[BaseActual]	=	'0';
-			BaseRef[BaseActual+1] 	=	Read[Offset-1];
-			BaseRead[BaseActual+1]	=	'0';
 			for(int q=Offset-1;q<L-2;q++){
 				Read[q] = Read[q+2];
 			}
 
 			//IMPRIMIR RESULTADOS
-			fprintf(ALIGN,"Base reference %c%c\n",BaseRef[BaseActual],BaseRef[BaseActual+1]);
-			fprintf(ALIGN,"Base read: %c%c\n",BaseRead[BaseActual],BaseRead[BaseActual+1]);
+			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
-			return (BaseActual+2);
 		break;
 		case 'I':
 
-			for(int q=(L-1);q>Offset;q--){
-				Read[q]	=	Read[q-1];
-			}
-			Read[Offset]	=	'N';
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	'0';
 			BaseRead[BaseActual]	=	Read[Offset];
 
-			//IMPRIMIR RESULTADOS
+			for(int q=(L-1);q>Offset+1;q--){
+				Read[q]	=	Read[q-1];
+			}
+			Read[Offset]	=	'N';
 
+			//IMPRIMIR RESULTADOS
 			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
 			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
-			return (BaseActual+1);
 		break;
 		case 'T':
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	Read[Offset];
 			BaseRead[BaseActual]	=	'0';
-			BaseRef[BaseActual+1] 	=	Read[Offset-1];
-			BaseRead[BaseActual+1]	=	'0';
-			BaseRef[BaseActual+2] 	=	Read[Offset-2];
-			BaseRead[BaseActual+2]	=	'0';
 			for(int q=Offset-2;q<L-3;q++){
 				Read[q] = Read[q+3];
 			}
 
 			//IMPRIMIR RESULTADOS
-			fprintf(ALIGN,"Base reference %c%c%c\n",BaseRef[BaseActual],BaseRef[BaseActual+1],BaseRef[BaseActual+2]);
-			fprintf(ALIGN,"Base read: %c%c%c\n",BaseRead[BaseActual],BaseRead[BaseActual+1],BaseRead[BaseActual+2]);
+			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
-			return (BaseActual+2);
 		break;
 		case 'S':
 
@@ -675,41 +632,30 @@ int ReverseMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,ui
 				if(BaseDest != Read[Offset-1]){
 					//GUARDAR LAS BASES Y APLICAR LA MUTACIÓN
 					BaseRef[BaseActual]		=	Read[Offset];
-					BaseRef[BaseActual+1]	=	Read[Offset-1];
 					BaseRead[BaseActual]	=	BaseDest;
-					BaseRead[BaseActual+1]	=	BaseDest;
 					Read[Offset]	=	BaseDest;
 					Read[Offset+1]	=	BaseDest;
 					flag = 1;
 				}
 			}while(flag != 1);
 
-			fprintf(ALIGN,"Bases reference %c%c\n",BaseRef[BaseActual],BaseRef[BaseActual+1]);
-			fprintf(ALIGN,"Base read: %c%c\n",BaseRead[BaseActual],BaseRead[BaseActual+1]);
+			fprintf(ALIGN,"Bases reference %c\n",BaseRef[BaseActual]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
 
-			return (BaseActual+2);
 		break;
 		case 'C':
 			//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 			BaseRef[BaseActual] 	=	Read[Offset];
 			BaseRead[BaseActual]	=	'0';
-			BaseRef[BaseActual+1] 	=	Read[Offset-1];
-			BaseRead[BaseActual+1]	=	'0';
-			BaseRef[BaseActual+2] 	=	Read[Offset-2];
-			BaseRead[BaseActual+2]	=	'0';
-			BaseRef[BaseActual+3] 	=	Read[Offset-3];
-			BaseRead[BaseActual+3]	=	'0';
 			for(int q=Offset-3;q<L-4;q++){
 				Read[q] = Read[q+4];
 			}
 
 			//IMPRIMIR RESULTADOS
-			fprintf(ALIGN,"Base reference %c%c%c%c\n",BaseRef[BaseActual],BaseRef[BaseActual+1],BaseRef[BaseActual+2],BaseRef[BaseActual+3]);
-			fprintf(ALIGN,"Base read: %c%c%c%c\n",BaseRead[BaseActual],BaseRead[BaseActual+1],BaseRead[BaseActual+2],BaseRead[BaseActual+3]);
+			fprintf(ALIGN,"Base reference %c\n",BaseRef[BaseActual]);
+			fprintf(ALIGN,"Base read: %c\n",BaseRead[BaseActual]);
 			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
-			return (BaseActual+2);
 		break;
 	}
  }
