@@ -5,23 +5,24 @@
  * LINEA 2:	(SECUENCIA)		AGNTAGNTAGNT
  * LINEA 3:	(COMENTARIO)	Siempre empieza con +
  * LINEA 4:	(QUALITY SCORE)	Es un valor que entrega la máquina
- * NOTAS:   EL QS SE GENERA CON UN SOLO VALOR QUE SE REPETIRÁ HASTA ALCANZAR LA MISMA LONGITUD QUE   LA SECUENCIA
 
 ##ENTRADA DEL PROGRAMA
+First Header | Second Header
+------------ | -------------
+Content from cell 1 | Content from cell 2
+Content in the first column | Content in the second column
+
 _NOTA: SE DEBE RESPETAR ESTA NOTACIÓN_
-VARIABLE            | DESCRIPCIÓN
-------------------- | ---------------------------
-DATA	            |	NOMBRE ARCHIVO DE EXTENSIÓN FASTA
-I	  	            |   IDENTIFICADOR PARA TODOS LOS READS, LOS DOS ÚLTIMOS NÚMEROS CAMBIAN DE 
-			            FORMA ALEATORIA,TAMBIÉN ES EL ID DEL ARCHIVO .FASTQ
-Q		            |	QUALITY SCORE PARA TODOS LOS ARCHIVOS
-L		            |	LONGITUD DE LOS READS
-C		            |	COVERAGE: ES INFORMACIÓN DE IMPORTANCIA BIOLÓGICA, NO PARA NOSOTROS
-B		            |	BASE DE READS: EL TOTAL DE READS A GENERAR SERÁ BxC 
-E		            | 	CANTIDAD DE ERRORES DE CADA READ, DEBE SER MENOR QUE LA LONGITUD
-P		            |	ES UNA BANDERA, SI ESTÁ ACTIVADA, ENTONCES SOLO SE CONSIDERAN DOS TIPOS
-			            DE MATCHING, FORWARD AND REVERSE EQUIPROBABLES DE SUCEDER (OPCIONAL)
-lambda	            |	VALOR AJUSTABLE PARA MODIFICAR LA FUNCIÓN EXPONENCIAL
+VARIABLE | DESCRIPCIÓN | TYPE
+-------- | ----------- | ----
+DATA | Nombre del archivo de extensión fasta | char*
+I | Identificador de los reads, es un valor fijo, cambia el id | char*
+Q | Quality score de los reads, es un valor fijo, no cambia | char*
+L | Longitud de la secuencia de los reads | uint16_t [0-1024]
+C | Valor entre [10 - 100], determina la cantidad de Reads | uint8_t
+B | Valor fijo en 200000, B*C = Cantidad de reads a generar | uint32_t
+P0 | Es el valor de ajuste de la distribución exponencial | double
+
 
 
 ##SALIDA DEL PROGRAMA

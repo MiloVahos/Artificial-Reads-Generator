@@ -38,7 +38,8 @@ int main (int argc, char *argv[]) {
 	}
 
     //Lets calculate the minimun and the maximun number of errors per read
-    int MinK    =   (int) floor(ErrPercentage   *   ReadLengthMin);
+    //int MinK    =   (int) floor(ErrPercentage   *   ReadLengthMin);
+    int MinK    =   0;
     int MaxK    =   (int) floor(ErrPercentage   *   ReadLengthMax);
     fprintf(pf,"MinK    =   %d\n",MinK);
     fprintf(pf,"MaxK    =   %d\n",MaxK); 
