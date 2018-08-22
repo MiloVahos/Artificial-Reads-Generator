@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "Stats.h"
+#include <stdlib.h>
 
 //selMutation:	Determina a que tipo de mutación corresponde el lanzamiento del dado
 //@param:	int ErrorSel	:	Valor resultante de la búsqueda binaria
@@ -67,6 +68,83 @@ char selBase(int sel,char Base){
 		break;
 	}
 }
+
+
+void mutsVector (uint16_t lendesc,uint8_t *Oper,uint16_t *Cnt,double *MutTypeAcumF){
+	for(int i=0;	i<lendesc;	i++){
+		double dado	=	LanzarDado();
+		int ErrorSel	=	BusqBin_Rul(MutTypeAcumF,MUTATION_TYPES,dado);
+		Oper[i]		=	selMutation(ErrorSel);
+		switch((char)Oper[i]){
+		//0->s 1->d 2->i 3->D 4->I 5->T 6->S 7->C
+			case 's': Cnt[0]++; break;
+			case 'i': Cnt[2]++; break;
+			case 'I': Cnt[4]++; break;
+			case 'S': Cnt[6]++; break;
+		}
+	}
+}
+
+void offsetsGen	(uint16_t lendesc,char strand,uint16_t *Offsets,uint8_t *Oper, uint16_t L){
+
+	uint32_t OffsetAnt	=	0;	//ACUMULADOR DE OFFSETS
+	uint32_t OffsetAux	=	0;	//OFFSET ACTUAL
+	for (int i=0;	i<lendesc;	i++){
+		if((strand=='f')||(strand=='c')){
+			if(i==0){
+				OffsetAux 	= 	rand() %(((L-1)-lendesc) + 1 - 0) + 0;
+				Offsets[i]	=	OffsetAux;
+			}else{
+				switch(Oper[i-1]){
+					case 's': case 'S': case 'i': case 'I':
+						OffsetAux	=	rand() %(((L-1)-(lendesc-i)) + 1 - (OffsetAnt+1)) + (OffsetAnt+1);
+						Offsets[i]	=	OffsetAux	-	OffsetAnt;
+					break;
+					default:
+						OffsetAux	=	rand() %(((L-1)-(lendesc-i)) + 1 - (OffsetAnt)) + (OffsetAnt);
+						Offsets[i]	=	OffsetAux	-	OffsetAnt;
+				}
+				if(OffsetAux>1024) printf("forward mayor 1024\n");
+				if(OffsetAux<0) printf("forward menor 0\n");
+			}
+		}else{
+			if(i==0){
+				OffsetAux = rand() %((L-1) + 1 - (0+lendesc)) + (0+lendesc);
+				Offsets[i]	=	OffsetAux;
+			}else{
+				switch(Oper[i-1]){
+					case 's': case 'S': case 'd':
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+					break;
+					case 'D':
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+					break;
+					case 'T':
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+					break;
+					case 'C':
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+					break;
+					default:
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+				}
+				printf("%"PRIu32"\n",OffsetAux);
+				if(OffsetAux>1024) printf("Reverse mayor 1024\n");
+				if(OffsetAux<0) printf("Reverse menor 0\n");
+			}
+		}
+		printf("r = %d\n",((L-1)-(lendesc-i)) + 1 - (OffsetAnt));
+		OffsetAnt	=	OffsetAux;
+	}
+
+}
+
+
 
 void FordwardMutation(uint8_t Oper,char *Read,uint16_t Offset, uint8_t *BaseRef,uint8_t *BaseRead, int L, int BaseActual, FILE *ALIGN){
  	//VECTOR DE PROBABILIDADES DE LAS BASES PARA LAS SUBSTITUCIONES

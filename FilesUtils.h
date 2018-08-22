@@ -16,10 +16,9 @@
 #define LINE_LENGTH 1024
 #define CHRM_LENGTH 1024
 
-uint64_t 	contChars		(char*);
+uint64_t 	contChars	(char*);
 void 		getReference	(char*,char*);
-void		generateRead	(char*,uint32_t,int,char*,char*,FILE*,FILE*);
+void		generateRead	(char*,uint32_t,uint16_t,char*,char*,FILE*,FILE*);
 void		printCounters	(FILE*,uint16_t*);
-//char 		*load_reference	(char*,int);
 
 #endif

@@ -13,8 +13,10 @@
 
 #define MATCHING_TYPES 	4		//NÚMERO DE MATCHINGS POSIBLES
 
-void    ReverseRead     (char*,long);
-void 	ComplementRead  (char*,long);
-void	selMatching		(int,int,char*,char*);
+#include <inttypes.h>
+
+void    ReverseRead     (char*,uint16_t);
+void 	ComplementRead  (char*,uint16_t);
+void	selMatching	(int,uint16_t,char*,char*);
 
 #endif

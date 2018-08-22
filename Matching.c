@@ -11,31 +11,32 @@
 #include <stdio.h>
 #include <string.h>
 #include "Matching.h"
+#include <inttypes.h>
 
 //ReverseRead:	Implementa el inversor de reads
 //@param:	    char *Read	:	Apuntador al arreglo que contiene el Read
 //@param:	    long length	:	Longitud del Read
-void ReverseRead(char *Read, long length){
+void ReverseRead(char *Read, uint16_t L){
 
 	char aux;
 
-	for (int i=0;   i<length/2;   i++){
-        aux                 =   Read[length-i-1];
-		Read[length-i-1]    =   Read[i];
-		Read[i]             =   aux;
+	for (int i=0;   i<L/2;   i++){
+        	aux	=   Read[L-i-1];
+		Read[L-i-1]    =   Read[i];
+		Read[i]	=   aux;
 	}
 }
 
 //ComplementRead:	Implementa el complementador de reads (T,A)(C,G)
 //@param:	        char *Read	:	Apuntador al arreglo que contiene el Read
 //@param:	        long length	:	Longitud del Read
-void ComplementRead(char *Read, long length){
+void ComplementRead(char *Read, uint16_t L){
 
 	char Compl;
 	int i;
-	for (i=0;   i<length;   i++){
+	for (i=0;   i<L;   i++){
 		switch(Read[i]){
-			case 'A': Compl='T'; break;
+		    case 'A': Compl='T'; break;
 		    case 'a': Compl='T'; break;
 		    case 'C': Compl='G'; break;
 		    case 'c': Compl='G'; break;
@@ -56,7 +57,7 @@ void ComplementRead(char *Read, long length){
 //@param:			int L			:	Longitud del read
 //@param:			char *READ		:   Read
 //@param:			char *MT		:	Matching Type
-void selMatching(int MatTypeSel, int L, char *READ, char *MT){
+void selMatching(int MatTypeSel, uint16_t L, char *READ, char *MT){
 	switch(MatTypeSel){
 		case 0:                     //FORWARD MATCH
 			memcpy(MT,"F",1);
@@ -74,6 +75,6 @@ void selMatching(int MatTypeSel, int L, char *READ, char *MT){
 			ComplementRead(READ,L);
 			ReverseRead(READ,L);
 		break;
-		default:	printf ("**Error in the matching selection, wrong input base**");
+		default: printf ("**Error in the matching selection, wrong input base**");
 	}
 }

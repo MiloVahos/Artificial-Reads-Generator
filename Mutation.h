@@ -16,9 +16,12 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-uint8_t	selMutation	        (int);
-char 	selBase		        (int,char);
-void    FordwardMutation	(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
-void    ReverseMutation     (uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
+uint8_t		selMutation	       	(int);
+char 		selBase		      	(int,char);
+void		mutsVector		(uint16_t,uint8_t*,uint16_t*,double*);
+void		offsetsGen		(uint16_t,char,uint16_t*,uint8_t*,uint16_t);
+void    	FordwardMutation	(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
+void    	ReverseMutation     	(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
+
 
 #endif
