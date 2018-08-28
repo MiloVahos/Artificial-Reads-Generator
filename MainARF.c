@@ -249,7 +249,6 @@ int main(int argc, char *argv[]) {
 				FordwardMutation(Oper,Read,Offsets,OffRel,lendesc,BaseRead,BaseRef,BasesAcum,L,ALIGN);
 			} else {
 				ReverseMutation(Oper,Read,Offsets,OffRel,lendesc,BaseRead,BaseRef,BasesAcum,L,ALIGN);
-
 			}
 
 			if(BaseRef)		free(BaseRef);
