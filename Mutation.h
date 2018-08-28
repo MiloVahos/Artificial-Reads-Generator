@@ -16,12 +16,18 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-uint8_t		selMutation	       	(int);
-char 		selBase		      	(int,char);
-void		mutsVector		(uint16_t,uint8_t*,uint16_t*,double*);
-void		offsetsGen		(uint16_t,char,uint16_t*,uint8_t*,uint16_t);
-void    	FordwardMutation	(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
-void    	ReverseMutation     	(uint8_t,char*,uint16_t,uint8_t*,uint8_t*,int,int,FILE*);
+uint8_t	selMutation	       	(int);
+char 	selBase		      	(int,char);
+void	mutsVector		    (uint16_t,uint8_t*,uint16_t*,double*);
+void	offsetsGen		    (uint16_t,uint16_t*,uint16_t);
+void    genRelOffsets       (uint16_t,uint16_t*,uint16_t*);
+void    intercambiar        (uint16_t*, int, int);
+void    ordenarOffsets      (uint16_t*, uint16_t);
+// Oper - Read - Offsets - OffRel - BaseRef - BaseRead - BasesAcum - L - ALIGN
+void    FordwardMutation	(   uint8_t*,char*,uint16_t*,uint16_t*,uint16_t,
+                                uint8_t*,uint8_t*,double*,int,FILE*);
+void    ReverseMutation     (   uint8_t*,char*,uint16_t*,uint16_t*,uint16_t,
+                                uint8_t*,uint8_t*,double*,int,FILE*);
 
 
 #endif

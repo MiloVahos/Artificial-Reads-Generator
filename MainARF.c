@@ -67,10 +67,11 @@ int main(int argc, char *argv[]) {
 	uint8_t   	*Oper;      //Arreglo con la operación por error
 	uint16_t	*Cnt;		//Arreglo con los contadores por cada uno de los tipos de mutación
 	uint16_t  	*Offsets;   //Arreglo de offsets por cada error
+	uint16_t	*OffRel;	//Arreglo de offsets pero relativos a la mutación
 	uint8_t   	*BaseRef;   //Arreglo con la base de la referencia (Read Referencia)
 	uint8_t   	*BaseRead;  //Arreglo con la base después de la mutación (Read Destino)
 
-	//Obtener los datos suministrados en la linea de comando
+	//OBTENER LOS DATOS SUMINISTRADOS EN LA LÍNEA DE COMANDOS
 	if(argc>1){
 		for (int i = 1; i < argc; i++)	{
 			if (strcmp(argv[i], "-DATA")	== 0){
@@ -133,6 +134,15 @@ int main(int argc, char *argv[]) {
 	MatTypeAcumF[0]		= MatTypeStats[0];
 	for (int i=1; i<MATCHING_TYPES; i++){
 		MatTypeAcumF[i]	= MatTypeStats[i] + MatTypeAcumF[i-1];
+	}
+
+	//VECTOR PARA EL CÁLCULO DE BASES
+	double	BasesStats[4]	=	{0.3,0.3,0.3,0.1};
+	double 	*BasesAcum;
+	BasesAcum	=	(double*) malloc ( 4*sizeof(double) );
+	BasesAcum[0]	= 	BasesStats[0];
+	for (int i=1; i<4; i++){
+		BasesAcum[i]= BasesStats[i] + BasesAcum[i-1];
 	}
 
 	//VECTOR DE PROBABILIDADES DE ERROR EXPONENCIALES
@@ -201,13 +211,16 @@ int main(int argc, char *argv[]) {
 
 		//AQUÍ HAY DOS POSIBILIDADES, QUE EXISTAN ERRORES Y QUE NO
 		if(lendesc	!=	0){
+			
 			//EN ESTE CASO TENEMOS MUTACIONES EN EL READ
 			Oper        =   (uint8_t*)  malloc(lendesc*sizeof(uint8_t));
 			if (Oper	==	NULL) printf ("Not enough memory for Oper");
 			Cnt			=	(uint16_t*) malloc(MUTATION_TYPES*sizeof(uint16_t));
-			if (Cnt	==	NULL) printf ("Not enough memory for Cnt");
+			if (Cnt		==	NULL) printf ("Not enough memory for Cnt");
 			Offsets		=   (uint16_t*) malloc(lendesc*sizeof(uint16_t));
 			if (Offsets	==	NULL) printf ("Not enough memory for Offsets");
+			OffRel		=   (uint16_t*) malloc(lendesc*sizeof(uint16_t));
+			if (OffRel	==	NULL) printf ("Not enough memory for OffRel");
 
 			for(int i=0; i<MUTATION_TYPES;i++) Cnt[i]	=	0;
 
@@ -218,13 +231,13 @@ int main(int argc, char *argv[]) {
 			//SE VA A DETERMINAR EL VECTOR DE OPERACIONES PARA CALCULAR
 			//LOS OFFSETS DE MANERA EFICIENTE
 			//GENERAR EL VECTOR DE MUTACIONES A APLICAR
-			mutsVector(lendesc,Oper,Cnt,MutTypeAcumF);
-			
+			mutsVector(lendesc,Oper,Cnt,MutTypeAcumF);	
 
 			//GENERAR EL VECTOR DE OFFSETS
-			//LOS OFFSETS DEPENDE DEL TIPO DE MATCHING, DE LOS ERRORES QUE
-			//SE VAYAN A APLICAR
-			offsetsGen (lendesc,strand,Offsets,Oper,L);
+			offsetsGen (lendesc,Offsets,L);
+
+			//REPRESENTAR LOS OFFSETS EN DIFERENCIAS RELATIVAS
+			genRelOffsets(lendesc,Offsets,OffRel);
 
 			//SE INICIALIZAN LOS ARREGLOS
 			BaseRef		=	(uint8_t*)  malloc((lendesc)*sizeof(uint8_t));
@@ -232,43 +245,14 @@ int main(int argc, char *argv[]) {
 			BaseRead	=	(uint8_t*)  malloc((lendesc)*sizeof(uint8_t));
 			if (BaseRead 	==	NULL) printf ("Not enough memory for BaseRead");
 
-			int BaseActual		=	0;
-			uint32_t OffsetAnt	=	0;
+			if ((strand	==	'f')||(strand	==	'c')) {
+				FordwardMutation(Oper,Read,Offsets,OffRel,lendesc,BaseRead,BaseRef,BasesAcum,L,ALIGN);
+			} else {
+				ReverseMutation(Oper,Read,Offsets,OffRel,lendesc,BaseRead,BaseRef,BasesAcum,L,ALIGN);
 
-			for(int i=0; i<lendesc;	i++){
-
-				fprintf(ALIGN,"Operación de mutación: %c\n",Oper[i]);
-				//EL OFFSET SE GENERA DE ACUERDO AL TIPO DE MATCHING, FORWARD OR REVERSE
-				if ((strand	==	'f')||(strand	==	'c')) {
-					//FORWARD MATCHINGS
-					/*fprintf(ALIGN,"Offset[%d]	=	%d\n",i,Offsets[i]);
-					if(i==0){
-						//APLICAR LA MUTACIÓN
-						//printf("Oper = %c, Offset = %d, L = %d, Base = %d\n",Oper[i],Offsets[0],L,BaseActual);
-						FordwardMutation(Oper[i],Read,Offsets[0],BaseRef,BaseRead,L,BaseActual,ALIGN);
-						OffsetAnt	=	Offsets[0];
-					}else{
-						//APLICAR LA MUTACIÓN
-						//printf("Oper = %c, Offset = %d, L = %d, Base = %d\n",Oper[i],OffsetAnt+Offsets[i],L,BaseActual);
-						FordwardMutation(Oper[i],Read,(OffsetAnt+Offsets[i]),BaseRef,BaseRead,L,BaseActual,ALIGN);
-						OffsetAnt = OffsetAnt+Offsets[i];
-					}*/
-				}else{
-					//REVERSE MATCHINGS
-					fprintf(ALIGN,"Offset[%d]	=	%d\n",i,Offsets[i]);
-					if(i==0){
-						//APLICAR LA MUTACIÓN
-						ReverseMutation(Oper[i],Read,Offsets[0],BaseRef,BaseRead,L,BaseActual,ALIGN);
-						OffsetAnt	=	Offsets[0];
-					}else{
-						//APLICAR LA MUTACIÓN
-						ReverseMutation(Oper[i],Read,(OffsetAnt-Offsets[i]),BaseRef,BaseRead,L,BaseActual,ALIGN);
-						OffsetAnt	= OffsetAnt-Offsets[i];
-					}
-				}
-				BaseActual++;
 			}
-			if(BaseRef)	free(BaseRef);
+
+			if(BaseRef)		free(BaseRef);
 			if(BaseRead)	free(BaseRead);
 
 			//IMPRIMIR LOS CONTADORES
@@ -278,6 +262,7 @@ int main(int argc, char *argv[]) {
 			if(Oper)	free(Oper);
 			if(Cnt)		free(Cnt);
 			if(Offsets)	free(Offsets);
+			if(OffRel)	free(OffRel);
 		}else{
 			//EN ESTE CASO NO HAY ERRORES
 			//COMO NO HAY ERRORES EL MATCHING SE REPRESENTA EN MAYÚSCULA Y ES PERFECTO
@@ -301,14 +286,15 @@ int main(int argc, char *argv[]) {
 	fclose(FASTQSEQ);
 
 	if(Reference)	 free(Reference);
+	if(BasesAcum)	 free(BasesAcum);
 	if(ErrorStat)    free(ErrorStat);
 	if(MutTypeAcumF) free(MutTypeAcumF);
-	if(RefName)	 free(RefName);
-	if(RefMeta)	 free(RefMeta);
+	if(RefName)	 	 free(RefName);
+	if(RefMeta)	 	 free(RefMeta);
 	if(RefAlign)	 free(RefAlign);
-	if(RefFastq)	 free(RefFastq);
+	if(RefFastq) 	 free(RefFastq);
 	if(RefFastqseq)  free(RefFastqseq);
-	if(DATA)	 free(DATA);
-	if(I)		 free(I);
-	if(Q)		 free(Q);
+	if(DATA)	 	 free(DATA);
+	if(I)		 	 free(I);
+	if(Q)		 	 free(Q);
 }

@@ -1,0 +1,56 @@
+//MÉTODO DE GENERACIÓN DE OFFSETS
+
+uint32_t OffsetAnt	=	0;	//ACUMULADOR DE OFFSETS
+	uint32_t OffsetAux	=	0;	//OFFSET ACTUAL
+	for (int i=0;	i<lendesc;	i++){
+		if((strand=='f')||(strand=='c')){
+			if(i==0){
+				OffsetAux 	= 	rand() %(((L-1)-lendesc) + 1 - 0) + 0;
+				Offsets[i]	=	OffsetAux;
+			}else{
+				switch(Oper[i-1]){
+					case 's': case 'S': case 'i': case 'I':
+						OffsetAux	=	rand() %(((L-1)-(lendesc-i)) + 1 - (OffsetAnt+1)) + (OffsetAnt+1);
+						Offsets[i]	=	OffsetAux	-	OffsetAnt;
+					break;
+					default:
+						OffsetAux	=	rand() %(((L-1)-(lendesc-i)) + 1 - (OffsetAnt)) + (OffsetAnt);
+						Offsets[i]	=	OffsetAux	-	OffsetAnt;
+				}
+				if(OffsetAux>1024) printf("forward mayor 1024\n");
+				if(OffsetAux<0) printf("forward menor 0\n");
+			}
+		}else{
+			if(i==0){
+				OffsetAux = rand() %((L-1) + 1 - (0+lendesc)) + (0+lendesc);
+				Offsets[i]	=	OffsetAux;
+			}else{
+				switch(Oper[i-1]){
+					case 's': case 'S': case 'd':
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+					break;
+					case 'D':
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+					break;
+					case 'T':
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+					break;
+					case 'C':
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+					break;
+					default:
+						OffsetAux = rand() %((OffsetAnt) + 1 - (0+(lendesc-i))) + (0+(lendesc-i));
+						Offsets[i]	=	OffsetAnt - OffsetAux;
+				}
+				printf("%"PRIu32"\n",OffsetAux);
+				if(OffsetAux>1024) printf("Reverse mayor 1024\n");
+				if(OffsetAux<0) printf("Reverse menor 0\n");
+			}
+		}
+		printf("r = %d\n",((L-1)-(lendesc-i)) + 1 - (OffsetAnt));
+		OffsetAnt	=	OffsetAux;
+	}
