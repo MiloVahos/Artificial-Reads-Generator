@@ -66,6 +66,6 @@ FILE | *ALIGN,	*META | Punteros a los archivos de salida
 
 
 ### DEVELOPERS:
-_Juan Camilo Peña Vahos_ @MiloVahos96
-_Aníbal Guerra_
-_Sebastian Isaza Ramírez_
+_Juan Camilo Peña Vahos_ @MiloVahos96,
+_Aníbal Guerra_,
+_Sebastian Isaza Ramírez_,

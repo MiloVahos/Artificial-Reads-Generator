@@ -87,14 +87,9 @@ void generateRead(char *Read, uint32_t id, uint16_t L, char *Q, char *I, FILE *F
 
 }
 
+//printCounter: Imprime los contadores de mutaciones de cada Read
 void printCounters(FILE* ALIGN,uint16_t* Cnt){
 	//0->s 1->d 2->i 3->D 4->I 5->T 6->S 7->C
-	fprintf(ALIGN,"Cantidad de mutaciones tipo 's': %d\n",Cnt[0]);
-	fprintf(ALIGN,"Cantidad de mutaciones tipo 'd': %d\n",Cnt[1]);
-	fprintf(ALIGN,"Cantidad de mutaciones tipo 'i': %d\n",Cnt[2]);
-	fprintf(ALIGN,"Cantidad de mutaciones tipo 'D': %d\n",Cnt[3]);
-	fprintf(ALIGN,"Cantidad de mutaciones tipo 'I': %d\n",Cnt[4]);
-	fprintf(ALIGN,"Cantidad de mutaciones tipo 'T': %d\n",Cnt[5]);
-	fprintf(ALIGN,"Cantidad de mutaciones tipo 'S': %d\n",Cnt[6]);
-	fprintf(ALIGN,"Cantidad de mutaciones tipo 'C': %d\n",Cnt[7]);
+	fprintf(ALIGN,"Mutations per Read counter\n");
+	fprintf(ALIGN,"s: %"PRIu16" - d: %"PRIu16": i: %"PRIu16" - D: %"PRIu16" - I: %"PRIu16" - T: %"PRIu16" - S: %"PRIu16" - C: %"PRIu16" \n",Cnt[0],Cnt[1],Cnt[2],Cnt[3],Cnt[4],Cnt[5],Cnt[6],Cnt[7]);
 }

@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
 	char      	strand;     //Caractér con el sentido del matching
 	uint8_t   	*Oper;      //Arreglo con la operación por error
 	uint16_t	*Cnt;		//Arreglo con los contadores por cada uno de los tipos de mutación
+	uint16_t	*Hist;		//Arreglo con el acumulador de contadores Cnt
 	uint16_t  	*Offsets;   //Arreglo de offsets por cada error
 	uint16_t	*OffRel;	//Arreglo de offsets pero relativos a la mutación
 	uint8_t   	*BaseRef;   //Arreglo con la base de la referencia (Read Referencia)
@@ -169,6 +170,11 @@ int main(int argc, char *argv[]) {
 		MutTypeAcumF[i]= (MutTypeStats[i] / total_adaptMut) + MutTypeAcumF[i-1];
 	}
 
+	//HISTOGRAMA DE MUTACIONES EN TODO EL EXPERIMENTO
+	Hist	=	(uint16_t*) malloc(MUTATION_TYPES*sizeof(uint16_t));
+	if (Hist	==	NULL) printf ("Not enough memory for Hist");
+	for(int i=0; i<MUTATION_TYPES;i++) Hist[i]	=	0;
+
 	TotalChars	=	contChars(DATA);	//CANTIDAD DE CARACTERES DE LA REFERENCIA
 	Reference	=	(char*) malloc(TotalChars*sizeof(char));
 	if (Reference	==	NULL){
@@ -182,11 +188,11 @@ int main(int argc, char *argv[]) {
 	for(uint32_t ReadsCicle = 0; ReadsCicle<TotalReads; ReadsCicle++){
 
 		MT	=	(char*) malloc(sizeof(char));
-		if (MT == NULL) printf ("Not enough memory for MT"); 
+		if (MT == NULL) printf ("Not enough memory for MT");
 
 		//IDENTIFICADOR DEL READ
 		id	=	ReadsCicle+1;
-		fprintf(ALIGN,"ID: %"PRIu32"\n",id);
+		fprintf(ALIGN,"ID: %"PRIu32" - ",id);
 
 		//GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
 		Pos		=	(rand() %((TotalChars-L-READ_BIAS) - 0 + 1)) + 0;
@@ -204,12 +210,12 @@ int main(int argc, char *argv[]) {
 		dado 	= 	LanzarDado();
 		int MatTypeSel  =   BusqBin_Rul(MatTypeAcumF,MATCHING_TYPES,dado);
 		selMatching(MatTypeSel,L,Read,MT);
-		fprintf(ALIGN,"Referencia: %s\n",Read);
+		//fprintf(ALIGN,"Referencia: %s\n",Read);
 
 		//CALCULAR LA CANTIDAD DE ERROES
 		dado	=	LanzarDado();
 		lendesc	=	BusqBin_Rul(ErrorStat,t,dado);
-		fprintf(ALIGN,"Cantidad de errores:	%"PRIu16"\n",lendesc);
+		fprintf(ALIGN,"K: %"PRIu16" - ",lendesc);
 
 		//AQUÍ HAY DOS POSIBILIDADES, QUE EXISTAN ERRORES Y QUE NO
 		if(lendesc	!=	0){
@@ -228,12 +234,12 @@ int main(int argc, char *argv[]) {
 
 			//EL MATCHING SE PONE EN MINÚSCULA
 			strand	=	(char) tolower(*MT);
-			fprintf(ALIGN,"Matching type %c\n",strand);
+			fprintf(ALIGN,"MT: %c\n",strand);
 
 			//SE VA A DETERMINAR EL VECTOR DE OPERACIONES PARA CALCULAR
 			//LOS OFFSETS DE MANERA EFICIENTE
 			//GENERAR EL VECTOR DE MUTACIONES A APLICAR
-			mutsVector(lendesc,Oper,Cnt,MutTypeAcumF);	
+			mutsVector(lendesc,Oper,Cnt,Hist,MutTypeAcumF);	
 
 			//GENERAR EL VECTOR DE OFFSETS
 			offsetsGen (lendesc,Offsets,L);
@@ -269,7 +275,7 @@ int main(int argc, char *argv[]) {
 			//COMO NO HAY ERRORES EL MATCHING SE REPRESENTA EN MAYÚSCULA Y ES PERFECTO
 			strand	= *MT;
 			//EN EL ARCHIVO DE ALINEACIÓN SE MUESTRA EL TIPO DE MATCH NADA MÁS
-			fprintf(ALIGN,"Match Perfecto del tipo %c\n",strand);
+			fprintf(ALIGN,"MT: %c\n",strand);
 			//SE IMPRE EL READ Y LA SECUENCIA
 			generateRead(Read,id,L,Q,I,FASTQ,FASTQSEQ);
 		}
@@ -281,11 +287,16 @@ int main(int argc, char *argv[]) {
 		if(MT)		free(MT);
 	}
 
+	//IMPRIMIR EL HISTOGRAMA
+	fprintf(ALIGN,"MUTATIONS HISTOGRAM\n");
+	fprintf(ALIGN,"s: %"PRIu16" - d: %"PRIu16": i: %"PRIu16" - D: %"PRIu16" - I: %"PRIu16" - T: %"PRIu16" - S: %"PRIu16" - C: %"PRIu16" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
+
 	fclose(META);
 	fclose(ALIGN);
 	fclose(FASTQ);
 	fclose(FASTQSEQ);
 
+	if(Hist)		 free(Hist);
 	if(Reference)	 free(Reference);
 	if(BasesAcum)	 free(BasesAcum);
 	if(ErrorStat)    free(ErrorStat);
