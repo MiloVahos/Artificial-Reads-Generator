@@ -1,4 +1,4 @@
-# DOCUMENTACIÓN DEL GENERADOR ARITIFICIAL DE READS
+# ARTIFICIAL READS GENERATOR DOCS
 
 ## ESTRUCTURA DE UN READ
  * LINEA 1: (IDENTIFICADOR) Siempre empieza con @
@@ -48,6 +48,13 @@ uint64_t | TotalChars | Total de caracteres en la referencia (Número de bases e
 FILE | *FASTQ, *FASTQSEQ | Punteros a los archivos de salida
 FILE | *ALIGN,	*META | Punteros a los archivos de salida
 
+### CONSIDERACIONES DE PRUEBA
+
+1. B es un valor fijo esn 200000
+2. L es un valor fijo en 1024
+3. Sea K la cantidad máxima de errores de errores, que depende de P0, se hacen pruebas para
+    K= 230, 170, 110, 80, 60, 40, 28, 24, 20, Todos entre [0-19]
+
 ## SALIDA DEL PROGRAMA
  1. ARCHIVO .fastq:     CON BXC READS
  2. ARCHIVO .fastqseq:  CON LAS SECUENCIAS DE CADA READ,UNA POR LÍNEA
@@ -56,3 +63,9 @@ FILE | *ALIGN,	*META | Punteros a los archivos de salida
  4. ARCHIVO .meta:      CONTIENE LOS METADATOS DEL EXPERIMENTO,LOS QUE SE PASAN POR LA CONSOLA
                         Y ALGUNOS QUE SE GENERAN EN EL TRANSCURSO DE LA EJECUCACIÓN COMO LOS 
                         NOMBRES DE LOS ARCHIVOS ANTERIORES
+
+
+### DEVELOPERS:
+_Juan Camilo Peña Vahos_ @MiloVahos96
+_Aníbal Guerra_
+_Sebastian Isaza Ramírez_
