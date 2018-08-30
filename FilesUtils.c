@@ -91,5 +91,5 @@ void generateRead(char *Read, uint32_t id, uint16_t L, char *Q, char *I, FILE *F
 void printCounters(FILE* ALIGN,uint16_t* Cnt){
 	//0->s 1->d 2->i 3->D 4->I 5->T 6->S 7->C
 	fprintf(ALIGN,"Mutations per Read counter\n");
-	fprintf(ALIGN,"s: %"PRIu16" - d: %"PRIu16": i: %"PRIu16" - D: %"PRIu16" - I: %"PRIu16" - T: %"PRIu16" - S: %"PRIu16" - C: %"PRIu16" \n",Cnt[0],Cnt[1],Cnt[2],Cnt[3],Cnt[4],Cnt[5],Cnt[6],Cnt[7]);
+	fprintf(ALIGN,"s: %"PRIu16" - d: %"PRIu16" - i: %"PRIu16" - D: %"PRIu16" - I: %"PRIu16" - T: %"PRIu16" - S: %"PRIu16" - C: %"PRIu16" \n",Cnt[0],Cnt[1],Cnt[2],Cnt[3],Cnt[4],Cnt[5],Cnt[6],Cnt[7]);
 }

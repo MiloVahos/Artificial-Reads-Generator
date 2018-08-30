@@ -169,7 +169,6 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 		switch ( (char) Oper[i] ){
 
 			case 's':
-
 				//CALCULAR LA BASE DESTINO
 				dado		=	LanzarDado();
 				sel			=	BusqBin_Rul(BasesAcum,4,dado);
@@ -183,7 +182,6 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				posRead++;
 			break;
 			case 'd':
-
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	= 	posRead + OffRel[i];
 				for( int q = posRead; q < L-1; q++ ){
@@ -194,7 +192,6 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				BaseRead[i]	=	'0';
 			break;
 			case 'i':
-
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	= 	posRead + OffRel[i];
 				for( int q = (L-1); q > posRead; q--){
@@ -206,7 +203,6 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				posRead++;
 			break;
 			case 'D':
-
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead	+ OffRel[i];
 				for( int q = posRead; q< L-2; q++ ){
@@ -216,7 +212,6 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				BaseRead[i]	=	'0';
 			break;
 			case 'I':
-
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead + OffRel[i];
 				for( int q = (L-1); q > posRead; q-- ) {
@@ -226,11 +221,8 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				BaseRead[i]		=	'N';
 				Read[posRead]	=	'N';
 				posRead++;
-
-				//IMPRIMIR RESULTADOS
 			break;
 			case 'T':
-				
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead	+ OffRel[i];
 				for( int q = posRead; q< L-3; q++ ){
@@ -240,7 +232,6 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				BaseRead[i]	=	'0';
 			break;
 			case 'S':
-
 				//CALCULAR LA BASE DESTINO
 				flag = 0;
 				posRead	=	posRead	+ OffRel[i];
@@ -273,8 +264,8 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				BaseRead[i]	=	'0';
 			break;
 		}
-		fprintf(ALIGN,"MT: %c - ",Oper[i]);
-		fprintf(ALIGN,"Offset[%d] =	%d - ",i,Offsets[i]);
+		fprintf(ALIGN,"MUT: %c - ",Oper[i]);
+		fprintf(ALIGN,"Off[%d] = %d - ",i,Offsets[i]);
 		fprintf(ALIGN,"BRef %c - ",BaseRef[i]);
 		fprintf(ALIGN,"BRead %c\n",BaseRead[i]);
 	}
@@ -284,7 +275,7 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffRel,uint16_t lendesc,
 						uint8_t *BaseRef,uint8_t *BaseRead,double* BasesAcum,int L,FILE *ALIGN) {
 	
-	int posRead = L+200;
+	int posRead = L+500;
 	for ( int i = 0; i < lendesc; i++ ) {
 		double dado = 0;
 		int sel = 0;
@@ -294,7 +285,6 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 		switch ( (char) Oper[i] ){
 
 			case 's':
-
 				//CALCULAR LA BASE DESTINO
 				dado		=	LanzarDado();
 				sel			=	BusqBin_Rul(BasesAcum,4,dado);
@@ -307,8 +297,6 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 				posRead--;
 			break;
 			case 'd':
-			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	= 	posRead - OffRel[i];
 				for( int q = posRead; q < L-1; q++ ){
@@ -320,8 +308,6 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 				posRead--;
 			break;
 			case 'i':
-			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	= 	posRead - OffRel[i];
 				for( int q = (L-1); q > posRead+1; q--){
@@ -333,8 +319,6 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 
 			break;
 			case 'D':
-			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead	- OffRel[i];
 				for( int q = posRead-1; q< L-2; q++ ){
@@ -345,8 +329,6 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 				posRead 	= 	posRead-2;
 			break;
 			case 'I':
-			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead - OffRel[i];
 				for( int q = (L-1); q > posRead+1; q-- ) {
@@ -357,8 +339,6 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 				Read[posRead+1]	=	'N';
 			break;
 			case 'T':
-			fprintf(ALIGN,"SECUENCE: %s\n",Read);
-				
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead	- OffRel[i];
 				for( int q = posRead-2; q< L-3; q++ ){
@@ -392,7 +372,6 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 				} while(flag != 1);
 			break;
 			case 'C':
-			fprintf(ALIGN,"SECUENCE: %s\n",Read);
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead	- OffRel[i];
 				for( int q = posRead-3; q< L-4; q++ ){
@@ -403,7 +382,7 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 				posRead		=	posRead - 4;
 			break;
 		}
-		fprintf(ALIGN,"MT: %c - ",Oper[i]);
+		fprintf(ALIGN,"MUT: %c - ",Oper[i]);
 		fprintf(ALIGN,"Offset[%d] =	%d - ",i,Offsets[i]);
 		fprintf(ALIGN,"BRef %c - ",BaseRef[i]);
 		fprintf(ALIGN,"BRead %c\n",BaseRead[i]);
