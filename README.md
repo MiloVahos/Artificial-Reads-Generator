@@ -1,18 +1,21 @@
-#DOCUMENTACIÓN DEL GENERADOR ARITIFICIAL DE READS
+# DOCUMENTACIÓN DEL GENERADOR ARITIFICIAL DE READS
 
-##ESTRUCTURA DE UN READ
+## ESTRUCTURA DE UN READ
  * LINEA 1: (IDENTIFICADOR) Siempre empieza con @
  * LINEA 2:	(SECUENCIA)		AGNTAGNTAGNT
  * LINEA 3:	(COMENTARIO)	Siempre empieza con +
  * LINEA 4:	(QUALITY SCORE)	Es un valor que entrega la máquina
 
-##ENTRADA DEL PROGRAMA
+## ENTRADA DEL PROGRAMA
 First Header | Second Header
 ------------ | -------------
 Content from cell 1 | Content from cell 2
 Content in the first column | Content in the second column
 
 _NOTA: SE DEBE RESPETAR ESTA NOTACIÓN_
+
+## TABLA DE VARIABLES
+
 VARIABLE | DESCRIPCIÓN | TYPE
 -------- | ----------- | ----
 DATA | Nombre del archivo de extensión fasta | char*
