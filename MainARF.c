@@ -55,6 +55,8 @@ int main(int argc, char *argv[]) {
 	uint64_t 	TotalChars;			//Total de caracteres en la referencia
 	FILE 		*FASTQ, *FASTQSEQ;	//PUNTEROS A LOS ARCHIVOS
 	FILE		*ALIGN,	*META;		//PUNTEROS A LOS ARCHIVOS
+
+	//VARIABLES PARA CÁLCULOS ESTADÍSTICOS
 	int 		MaxK;				//TOTAL DE ERRORES L*ERROR_PER
 	int			t;					//NÚMERO DE ELEMENTOS DE LA RULETA
 	double		dado;				//DADO

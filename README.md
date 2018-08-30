@@ -6,29 +6,49 @@
  * LINEA 3:	(COMENTARIO)	Siempre empieza con +
  * LINEA 4:	(QUALITY SCORE)	Es un valor que entrega la máquina
 
-## ENTRADA DEL PROGRAMA
-First Header | Second Header
------------- | -------------
-Content from cell 1 | Content from cell 2
-Content in the first column | Content in the second column
-
 _NOTA: SE DEBE RESPETAR ESTA NOTACIÓN_
 
-## TABLA DE VARIABLES
+## TABLAS DE VARIABLES
+
+### CONSTANTES
+
+1. READ_BIAS:   Número de elementos extras que se agregan al Read para tener margen de overflow
+2. ERROR_PER:   Porcentaje de error válido en cada Read
+3. NAMES_SIZE:  Tamaño del char que contiene los nombres	
+4. READID_SIZE: Tamaño de los IDs
+5. READQ_SIZE:  Tamaño de los QSs
+
+### VARIABLES DE ENTRADA
+
+_NOTA: SE INGRESAN POR LA CONSOLA DE COMANDO, LA SINTAXIS ES -NombreVariable valorVariable, -I Y -Q SON BANDERAS_
 
 VARIABLE | DESCRIPCIÓN | TYPE
 -------- | ----------- | ----
 DATA | Nombre del archivo de extensión fasta | char*
-I | Identificador de los reads, es un valor fijo, cambia el id | char*
-Q | Quality score de los reads, es un valor fijo, no cambia | char*
+I | Bandera del identificador de los reads, es un valor fijo, cambia el id | char*
+Q | Bandera de los quality score de los reads, es un valor fijo, no cambia | char*
 L | Longitud de la secuencia de los reads | uint16_t [0-1024]
 C | Valor entre [10 - 100], determina la cantidad de Reads | uint8_t
 B | Valor fijo en 200000, B*C = Cantidad de reads a generar | uint32_t
 P0 | Es el valor de ajuste de la distribución exponencial | double
 
+### VARIABLES DEL PROCESO
 
+TYPE | VARIABLE | DESCRIPCIÓN
+-------- | ----------- | ----
+char* | Reference | Contiene todos las bases del archivo .fa, no contiene los comentarios
+char* | Read | Segmento de la referencia que se va a modificar y se imprimirá como la secuencia
+char* | RefName | Nombre del archivo de referencia, sin la extensión
+char* | RefFastq | Nombre del archivo fastq
+char* | RefFastqseq | Nombre del archivo fastqseq
+char* | RefAlign | Nombre del archivo align
+char* | RefMeta | Nombre del archivo meta
+uint32_t | TotalReads | Total de reads que se van a generar, se calcula como B*C (Mirar Pruebas)
+uint64_t | TotalChars | Total de caracteres en la referencia (Número de bases en la secuencia)
+FILE | *FASTQ, *FASTQSEQ | Punteros a los archivos de salida
+FILE | *ALIGN,	*META | Punteros a los archivos de salida
 
-##SALIDA DEL PROGRAMA
+## SALIDA DEL PROGRAMA
  1. ARCHIVO .fastq:     CON BXC READS
  2. ARCHIVO .fastqseq:  CON LAS SECUENCIAS DE CADA READ,UNA POR LÍNEA
  3. ARCHIVO .aling:     CONTIENE POR READ LOS DATOS DEL MATCHING DEL READ Y TODOS LOS DATOS 
