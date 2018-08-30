@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 	char      	strand;     //Caractér con el sentido del matching
 	uint8_t   	*Oper;      //Arreglo con la operación por error
 	uint16_t	*Cnt;		//Arreglo con los contadores por cada uno de los tipos de mutación
-	uint16_t	*Hist;		//Arreglo con el acumulador de contadores Cnt
+	uint32_t	*Hist;		//Arreglo con el acumulador de contadores Cnt
 	uint16_t  	*Offsets;   //Arreglo de offsets por cada error
 	uint16_t	*OffRel;	//Arreglo de offsets pero relativos a la mutación
 	uint8_t   	*BaseRef;   //Arreglo con la base de la referencia (Read Referencia)
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//HISTOGRAMA DE MUTACIONES EN TODO EL EXPERIMENTO
-	Hist	=	(uint16_t*) malloc(MUTATION_TYPES*sizeof(uint16_t));
+	Hist	=	(uint32_t*) malloc(MUTATION_TYPES*sizeof(uint32_t));
 	if (Hist	==	NULL) printf ("Not enough memory for Hist");
 	for(int i=0; i<MUTATION_TYPES;i++) Hist[i]	=	0;
 
@@ -289,7 +289,8 @@ int main(int argc, char *argv[]) {
 
 	//IMPRIMIR EL HISTOGRAMA
 	fprintf(ALIGN,"MUTATIONS HISTOGRAM\n");
-	fprintf(ALIGN,"s: %"PRIu16" - d: %"PRIu16": i: %"PRIu16" - D: %"PRIu16" - I: %"PRIu16" - T: %"PRIu16" - S: %"PRIu16" - C: %"PRIu16" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
+	fprintf(ALIGN,"s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
+	printf("s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
 
 	fclose(META);
 	fclose(ALIGN);

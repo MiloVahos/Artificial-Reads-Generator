@@ -18,7 +18,7 @@
 
 uint8_t	selMutation	       	(int);
 char 	selBase		      	(int,char);
-void	mutsVector		    (uint16_t,uint8_t*,uint16_t*,uint16_t*,double*);
+void	mutsVector		    (uint16_t,uint8_t*,uint16_t*,uint32_t*,double*);
 void	offsetsGen		    (uint16_t,uint16_t*,uint16_t);
 void    genRelOffsets       (uint16_t,uint16_t*,uint16_t*);
 void    intercambiar        (uint16_t*, int, int);

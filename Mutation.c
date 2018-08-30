@@ -70,7 +70,7 @@ char selBase(int sel,char Base){
 }
 
 //mutsVector:	Genera un vector con todas las operaciones de mutación que se van a aplicar
-void mutsVector (uint16_t lendesc,uint8_t *Oper,uint16_t *Cnt,uint16_t *Hist,double *MutTypeAcumF){
+void mutsVector (uint16_t lendesc,uint8_t *Oper,uint16_t *Cnt,uint32_t *Hist,double *MutTypeAcumF){
 	for(int i=0;	i<lendesc;	i++){
 		double dado		=	LanzarDado();
 		int ErrorSel	=	BusqBin_Rul(MutTypeAcumF,MUTATION_TYPES,dado);
