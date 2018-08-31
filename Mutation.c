@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "Stats.h"
 #include <stdlib.h>
+#include <string.h>
 
 //selMutation:	Determina a que tipo de mutación corresponde el lanzamiento del dado
 //@param:	int ErrorSel	:	Valor resultante de la búsqueda binaria
@@ -107,7 +108,8 @@ void offsetsGen	(uint16_t lendesc,uint16_t *Offsets, uint16_t L){
 		int flag = 0;
 		int OffsetAux = 0;
 		do {
-			OffsetAux	=	rand() %(((L-1)-(lendesc - i)) + 1 - 0) + 0;
+			//OffsetAux	=	rand() %(((L-1)-(lendesc - i)) + 1 - 0) + 0;
+			OffsetAux	=	rand() %(L-200) + 0;
 			if ( i != 0 ) {
 				int contador = 0;
 				for (int j = 0; j < i; j++ ) {
@@ -160,6 +162,11 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 						uint8_t *BaseRef,uint8_t *BaseRead,double* BasesAcum,int L,FILE *ALIGN) {
 
 	int posRead = 0;
+	char *ReadAuxiliar;
+	ReadAuxiliar	=	(char*) malloc ( L+1024 * sizeof(char) );
+	if (ReadAuxiliar	==	NULL) printf ("Not enough memory for ReadAuxiliar");
+	memcpy(ReadAuxiliar,Read,L+1024);
+
 	for ( int i = 0; i < lendesc; i++ ) {
 		double dado = 0;
 		int sel = 0;
@@ -176,59 +183,63 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 
 				
 				posRead			= 	posRead + OffRel[i];
-				Read[posRead]	=	BaseDest;
-				BaseRef[i]		=	Read[posRead];
+				BaseRef[i]		=	ReadAuxiliar[posRead];
+				Read[posRead]		=	BaseDest;
 				BaseRead[i]		=	BaseDest;
 				posRead++;
 			break;
 			case 'd':
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	= 	posRead + OffRel[i];
+				BaseRef[i] 	=	ReadAuxiliar[posRead];
 				for( int q = posRead; q < L-1; q++ ){
   					Read[q]	=	Read[q+1];
   				}
 					
-				BaseRef[i] 	=	Read[posRead];
 				BaseRead[i]	=	'0';
 			break;
 			case 'i':
+				dado		=	LanzarDado();
+				sel		=	BusqBin_Rul(BasesAcum,4,dado);
+				BaseDest	=	selBase(sel,Read[Offsets[i]]);
+				
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	= 	posRead + OffRel[i];
 				for( int q = (L-1); q > posRead; q--){
   					Read[q]	=	Read[q-1];
   				}
+				Read[posRead]	=	BaseDest;
 				BaseRef[i] 	=	'0';
-				BaseRead[i]	=	Read[posRead];
-				// Read[posRead]	=	aux; 	//PREGUNTAR ESTO
+				BaseRead[i]	=	BaseDest;
 				posRead++;
 			break;
 			case 'D':
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead	+ OffRel[i];
+				BaseRef[i] 	=	ReadAuxiliar[posRead];
 				for( int q = posRead; q< L-2; q++ ){
   			   		Read[q]	=	Read[q+2];
   			   	}
-				BaseRef[i] 	=	Read[posRead];
 				BaseRead[i]	=	'0';
 			break;
 			case 'I':
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead + OffRel[i];
+				BaseRef[i] 	=	ReadAuxiliar[posRead];
 				for( int q = (L-1); q > posRead; q-- ) {
 					Read[q]	=	Read[q-1];
 				}
-				BaseRef[i] 		=	Read[posRead];
 				BaseRead[i]		=	'N';
-				Read[posRead]	=	'N';
+				Read[posRead]		=	'N';
 				posRead++;
 			break;
 			case 'T':
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead	+ OffRel[i];
+				BaseRef[i] 	=	ReadAuxiliar[posRead];
 				for( int q = posRead; q< L-3; q++ ){
 					Read[q]	=	Read[q+3];
 				}
-				BaseRef[i] 	=	Read[posRead];
 				BaseRead[i]	=	'0';
 			break;
 			case 'S':
@@ -242,11 +253,11 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 					if(BaseDest != Read[posRead+1]){
 						//GUARDAR LAS BASES Y APLICAR LA MUTACIÓN
 						Read[posRead]	=	BaseDest;
-						BaseRef[i]		=	Read[posRead];
+						BaseRef[i]		=	ReadAuxiliar[posRead];
 						BaseRead[i]		=	BaseDest;
 						posRead++;
 						Read[posRead]	=	BaseDest;
-						BaseRef[i]		=	Read[posRead];
+						BaseRef[i]		=	ReadAuxiliar[posRead];
 						BaseRead[i]		=	BaseDest;
 						posRead++;
 						flag = 1;
@@ -257,15 +268,15 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 			case 'C':
 				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
 				posRead	=	posRead	+ OffRel[i];
+				BaseRef[i] 	=	ReadAuxiliar[posRead];
 				for( int q = posRead; q< L-4; q++ ){
   			   		Read[q]	=	Read[q+4];
   			   	}
-				BaseRef[i] 	=	Read[posRead];
 				BaseRead[i]	=	'0';
 			break;
 		}
 		fprintf(ALIGN,"MUT: %c - ",Oper[i]);
-		fprintf(ALIGN,"Off[%d] = %d - ",i,Offsets[i]);
+		fprintf(ALIGN,"Off[%d] = %d - ",i,OffRel[i]);
 		fprintf(ALIGN,"BRef %c - ",BaseRef[i]);
 		fprintf(ALIGN,"BRead %c\n",BaseRead[i]);
 	}
@@ -275,116 +286,127 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffRel,uint16_t lendesc,
 						uint8_t *BaseRef,uint8_t *BaseRead,double* BasesAcum,int L,FILE *ALIGN) {
 	
-	int posRead = L+500;
+	int posRead = L;
+	char *ReadAuxiliar;
+	ReadAuxiliar	=	(char*) malloc ( L+1024 * sizeof(char) );
+	if (ReadAuxiliar	==	NULL) printf ("Not enough memory for ReadAuxiliar");
+	memcpy(ReadAuxiliar,Read,L+1024);
+
 	for ( int i = 0; i < lendesc; i++ ) {
 		double dado = 0;
 		int sel = 0;
 		char BaseDest;
 		int flag = 0;
-
-		switch ( (char) Oper[i] ){
-
-			case 's':
-				//CALCULAR LA BASE DESTINO
-				dado		=	LanzarDado();
-				sel			=	BusqBin_Rul(BasesAcum,4,dado);
-				BaseDest	=	selBase(sel,Read[Offsets[i]]);
-				
-				posRead			= 	posRead - OffRel[i];
-				Read[posRead]	=	BaseDest;
-				BaseRef[i]		=	Read[posRead];
-				BaseRead[i]		=	BaseDest;
-				posRead--;
-			break;
-			case 'd':
-				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
-				posRead	= 	posRead - OffRel[i];
-				for( int q = posRead; q < L-1; q++ ){
-  					Read[q]	=	Read[q+1];
-  				}
-					
-				BaseRef[i] 	=	Read[posRead];
-				BaseRead[i]	=	'0';
-				posRead--;
-			break;
-			case 'i':
-				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
-				posRead	= 	posRead - OffRel[i];
-				for( int q = (L-1); q > posRead+1; q--){
-  					Read[q]	=	Read[q-1];
-  				}
-				BaseRef[i] 	=	'0';
-				BaseRead[i]	=	Read[posRead];
-				// Read[posRead]	=	aux; 	//PREGUNTAR ESTO
-
-			break;
-			case 'D':
-				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
-				posRead	=	posRead	- OffRel[i];
-				for( int q = posRead-1; q< L-2; q++ ){
-  			   		Read[q]	=	Read[q+2];
-  			   	}
-				BaseRef[i] 	=	Read[posRead];
-				BaseRead[i]	=	'0';
-				posRead 	= 	posRead-2;
-			break;
-			case 'I':
-				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
-				posRead	=	posRead - OffRel[i];
-				for( int q = (L-1); q > posRead+1; q-- ) {
-					Read[q]	=	Read[q-1];
-				}
-				BaseRef[i] 		=	Read[posRead];
-				BaseRead[i]		=	'N';
-				Read[posRead+1]	=	'N';
-			break;
-			case 'T':
-				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
-				posRead	=	posRead	- OffRel[i];
-				for( int q = posRead-2; q< L-3; q++ ){
-					Read[q]	=	Read[q+3];
-				}
-				BaseRef[i] 	=	Read[posRead];
-				BaseRead[i]	=	'0';
-				posRead		=	posRead-3;
-			break;
-			case 'S':
-				//CALCULAR LA BASE DESTINO
-				flag = 0;
-				posRead	=	posRead	- OffRel[i];
-				do{
+		if(posRead <  0){
+			int aux = lendesc - i;
+			fprintf(ALIGN,"Errores faltantes: %d\n",aux);
+			i = lendesc;
+		} else {
+			switch ( (char) Oper[i] ){
+		
+				case 's':
+					//CALCULAR LA BASE DESTINO
 					dado		=	LanzarDado();
-					sel			=	BusqBin_Rul(BasesAcum,4,dado);
-					BaseDest	=	selBase(sel,Read[posRead]);
-					if(BaseDest != Read[posRead+1]){
-						//GUARDAR LAS BASES Y APLICAR LA MUTACIÓN
-						Read[posRead]	=	BaseDest;
-						BaseRef[i]		=	Read[posRead];
-						BaseRead[i]		=	BaseDest;
-						posRead--;
-						Read[posRead]	=	BaseDest;
-						BaseRef[i]		=	Read[posRead];
-						BaseRead[i]		=	BaseDest;
-						posRead--;
-						flag = 1;
-					}
+					sel		=	BusqBin_Rul(BasesAcum,4,dado);
+					BaseDest	=	selBase(sel,Read[Offsets[i]]);
+				
+					posRead			= 	posRead - OffRel[i];
+					Read[posRead]	=	BaseDest;
+					BaseRef[i]		=	Read[posRead];
+					BaseRead[i]		=	BaseDest;
+					posRead--;
+				break;
+				case 'd':
+					//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
+					posRead	= 	posRead - OffRel[i];
+					for( int q = posRead; q < L-1; q++ ){
+	  					Read[q]	=	Read[q+1];
+	  				}
+					
+					BaseRef[i] 	=	Read[posRead];
+					BaseRead[i]	=	'0';
+					posRead--;
+				break;
+				case 'i':
+					//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
+					posRead	= 	posRead - OffRel[i];
+					for( int q = (L-1); q > posRead+1; q--){
+	  					Read[q]	=	Read[q-1];
+	  				}
+					BaseRef[i] 	=	'0';
+					BaseRead[i]	=	Read[posRead];
+					// Read[posRead]	=	aux; 	//PREGUNTAR ESTO
 
-				} while(flag != 1);
-			break;
-			case 'C':
-				//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
-				posRead	=	posRead	- OffRel[i];
-				for( int q = posRead-3; q< L-4; q++ ){
-  			   		Read[q]	=	Read[q+4];
-  			   	}
-				BaseRef[i] 	=	Read[posRead];
-				BaseRead[i]	=	'0';
-				posRead		=	posRead - 4;
-			break;
+				break;
+				case 'D':
+					//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
+					posRead	=	posRead	- OffRel[i];
+					for( int q = posRead-1; q< L-2; q++ ){
+	  			   		Read[q]	=	Read[q+2];
+	  			   	}
+					BaseRef[i] 	=	Read[posRead];
+					BaseRead[i]	=	'0';
+					posRead 	= 	posRead-2;
+				break;
+				case 'I':
+					//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
+					posRead	=	posRead - OffRel[i];
+					for( int q = (L-1); q > posRead+1; q-- ) {
+						Read[q]	=	Read[q-1];
+					}
+					BaseRef[i] 		=	Read[posRead];
+					BaseRead[i]		=	'N';
+					Read[posRead+1]	=	'N';
+				break;
+				case 'T':
+					//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
+					posRead	=	posRead	- OffRel[i];
+					for( int q = posRead-2; q< L-3; q++ ){
+						Read[q]	=	Read[q+3];
+					}
+					BaseRef[i] 	=	Read[posRead];
+					BaseRead[i]	=	'0';
+					posRead		=	posRead-3;
+				break;
+				case 'S':
+					//CALCULAR LA BASE DESTINO
+					flag = 0;
+					posRead	=	posRead	- OffRel[i];
+					do{
+						dado		=	LanzarDado();
+						sel			=	BusqBin_Rul(BasesAcum,4,dado);
+						BaseDest	=	selBase(sel,Read[posRead]);
+						if(BaseDest != Read[posRead+1]){
+							//GUARDAR LAS BASES Y APLICAR LA MUTACIÓN
+							Read[posRead]	=	BaseDest;
+							BaseRef[i]		=	Read[posRead];
+							BaseRead[i]		=	BaseDest;
+							posRead--;
+							Read[posRead]	=	BaseDest;
+							BaseRef[i]		=	Read[posRead];
+							BaseRead[i]		=	BaseDest;
+							posRead--;
+							flag = 1;
+						}
+
+					} while(flag != 1);
+				break;
+				case 'C':
+					//APLICAR LA MUTACIÓN Y GUARDAR LAS BASES
+					posRead	=	posRead	- OffRel[i];
+					for( int q = posRead-3; q< L-4; q++ ){
+	  			   		Read[q]	=	Read[q+4];
+	  			   	}
+					BaseRef[i] 	=	Read[posRead];
+					BaseRead[i]	=	'0';
+					posRead		=	posRead - 4;
+				break;
+			}
+			fprintf(ALIGN,"MUT: %c - ",Oper[i]);
+			fprintf(ALIGN,"Offset[%d] =	%d - ",i,OffRel[i]);
+			fprintf(ALIGN,"BRef %c - ",BaseRef[i]);
+			fprintf(ALIGN,"BRead %c\n",BaseRead[i]); 
 		}
-		fprintf(ALIGN,"MUT: %c - ",Oper[i]);
-		fprintf(ALIGN,"Offset[%d] =	%d - ",i,Offsets[i]);
-		fprintf(ALIGN,"BRef %c - ",BaseRef[i]);
-		fprintf(ALIGN,"BRead %c\n",BaseRead[i]);
+		
 	}
 }
