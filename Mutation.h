@@ -13,6 +13,7 @@
 #define MUTATION_H
 
 #define MUTATION_TYPES	8		//NÚMERO DE MUTACIONES POSIBLES
+#define READ_BIAS	1024	//SE OBTIENEN ALGUNAS BASES EXTRAS PARA OPERAR
 #include <inttypes.h>
 #include <stdio.h>
 

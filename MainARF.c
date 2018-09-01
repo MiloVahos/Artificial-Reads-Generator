@@ -23,7 +23,6 @@
 #include "Mutation.h"
 #include "FilesUtils.h"
 
-#define READ_BIAS	1024	//SE OBTIENEN ALGUNAS BASES EXTRAS PARA OPERAR
 #define ERROR_PER   0.25    //PORCENTAJE DE ERRORES EN EL READ
 #define NAMES_SIZE	40		//ESPACIO PARA EL NOMBRE DE LOS ARCHIVOS
 #define READID_SIZE 50		//TAMAÑO DE I
@@ -290,7 +289,7 @@ int main(int argc, char *argv[]) {
 	//IMPRIMIR EL HISTOGRAMA
 	fprintf(ALIGN,"MUTATIONS HISTOGRAM\n");
 	fprintf(ALIGN,"s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
-	printf("s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
+	//printf("s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
 
 	fclose(META);
 	fclose(ALIGN);
