@@ -53,7 +53,6 @@ FILE | *ALIGN,	*META | Punteros a los archivos de salida
 
 TYPE | VARIABLE | DESCRIPCIÓN
 -------- | ----------- | ----
-
 uint32_t  | id | Identificador consecutivo para cada uno de los Reads
 uint32_t  |	Pos | Posición de Matching respecto a la referencia
 uint16_t  |	lendesc | Cantidad de errores total en el Read
