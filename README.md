@@ -48,6 +48,25 @@ uint64_t | TotalChars | Total de caracteres en la referencia (Número de bases e
 FILE | *FASTQ, *FASTQSEQ | Punteros a los archivos de salida
 FILE | *ALIGN,	*META | Punteros a los archivos de salida
 
+### VARIABLES DEL PROCESO DE MUTACIÓN
+
+
+TYPE | VARIABLE | DESCRIPCIÓN
+-------- | ----------- | ----
+
+uint32_t  | id | Identificador consecutivo para cada uno de los Reads
+uint32_t  |	Pos | Posición de Matching respecto a la referencia
+uint16_t  |	lendesc | Cantidad de errores total en el Read
+char      | strand | Caractér con el sentido del matching
+uint8_t*  | Oper | Arreglo con la operación por error
+uint16_t* |	Cnt	| Arreglo con los contadores por cada uno de los tipos de mutación
+uint32_t* |	Hist | Arreglo con el acumulador de contadores Cnt
+uint16_t* | Offsets | Arreglo de offsets por cada error
+uint16_t* |	OffRel | Arreglo de offsets pero relativos a la mutación
+uint8_t*  | BaseRef | Arreglo con la base de la referencia (Read Referencia)
+uint8_t*  | BaseRead | Arreglo con la base después de la mutación (Read Destino)
+
+
 ### CONSIDERACIONES DE PRUEBA
 
 1. B es un valor fijo esn 200000
@@ -64,11 +83,16 @@ FILE | *ALIGN,	*META | Punteros a los archivos de salida
                         Y ALGUNOS QUE SE GENERAN EN EL TRANSCURSO DE LA EJECUCACIÓN COMO LOS 
                         NOMBRES DE LOS ARCHIVOS ANTERIORES
 
+## COMO COMPILAR 
+[x] gcc -o ARF MainARF.c Matching.c Mutation.c  Stats.c FilesUtils.c -lm
+[x] ./ARF -DATA lambda_virus.fa -I -Q -L 1024 -B 200000 -C 10 -P0 0.02
+_NOTA:_ Recuerde que los parámtros C y P0 se van a variar en las pruebas    
 
 ## _ACLARACIÓN SOBRE DISTRIBUCIÓN_
 En este momento la distribución de los offsets, es uniforme, unicamente, en el intervalo [0 , (L-280)]. Funciona solo para pruebas con L = 1024
 Esta decisión viene dada por errores técnicos en los excedentes al principio o al final del read al aplicar las mutaciones en los distintos casos de matchings.
 
+_NOTA:_ No modifique el branch master, si desea agregar cambios o enviar comentarios porfavor crear un nuevo branch y deje un comentario con los cambios que va a hacer, si cree que es necesario modificar el master, enviar un correo a **milovahos@gmail.com**
 
 ### DEVELOPERS:
 _Juan Camilo Peña Vahos_ @MiloVahos96,
