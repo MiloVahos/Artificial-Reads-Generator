@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
 
 		//GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
 		Pos		=	(rand() %((TotalChars-L-READ_BIAS) - 0 + 1)) + 0;
-		fprintf(ALIGN,"Match Ref: %"PRIu32"\n",Pos);
+		fprintf(ALIGN,"Offset Ref: %"PRIu32"\n",Pos);
 
 		//OBTENER EL READ DE REFERENCIA DESDE LA POSICIÓN DE MAPEO
 		Read	=	(char*) malloc((L+READ_BIAS)*sizeof(char));
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
 				ReverseMutation(Oper,Read,Offsets,OffRel,lendesc,BaseRead,BaseRef,BasesAcum,L,ALIGN);
 			}
 
-			if(BaseRef)	free(BaseRef);
+			if(BaseRef)		free(BaseRef);
 			if(BaseRead)	free(BaseRead);
 
 			//IMPRIMIR LOS CONTADORES
@@ -267,8 +267,8 @@ int main(int argc, char *argv[]) {
 			generateRead(Read,id,L,Q,I,FASTQ,FASTQSEQ);
 			if(Oper)	free(Oper);
 			if(Cnt)		free(Cnt);
-			//if(Offsets)	free(Offsets);
-			//if(OffRel)	free(OffRel);
+			if(Offsets)	free(Offsets);
+			if(OffRel)	free(OffRel);
 		}else{
 			//EN ESTE CASO NO HAY ERRORES
 			//COMO NO HAY ERRORES EL MATCHING SE REPRESENTA EN MAYÚSCULA Y ES PERFECTO
@@ -282,7 +282,7 @@ int main(int argc, char *argv[]) {
 		fprintf(ALIGN,"\n\n");
 		fprintf(FASTQ,"\n\n");
 
-		//if(Read)	free(Read);
+		if(Read)	free(Read);
 		if(MT)		free(MT);
 	}
 

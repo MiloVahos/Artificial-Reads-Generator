@@ -64,10 +64,6 @@ FILE | *ALIGN,	*META | Punteros a los archivos de salida
                         Y ALGUNOS QUE SE GENERAN EN EL TRANSCURSO DE LA EJECUCACIÓN COMO LOS 
                         NOMBRES DE LOS ARCHIVOS ANTERIORES
 
-## _ACLARACIÓN SOBRE DISTRIBUCIÓN_
-En este momento la distribución de los offsets, es uniforme, unicamente, en el intervalo [0 - L-200]. Funciona solo para pruebas con L = 1024
-Esta decisión viene dada por errores técnicos en los excedentes al principio o al final del read al aplicar las mutaciones en los distintos casos
-de matchings.
 
 ## _ACLARACIÓN SOBRE DISTRIBUCIÓN_
 En este momento la distribución de los offsets, es uniforme, unicamente, en el intervalo [0 , (L-280)]. Funciona solo para pruebas con L = 1024
