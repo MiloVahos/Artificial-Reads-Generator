@@ -65,6 +65,15 @@ uint16_t* |	OffRel | Arreglo de offsets pero relativos a la mutación
 uint8_t*  | BaseRef | Arreglo con la base de la referencia (Read Referencia)
 uint8_t*  | BaseRead | Arreglo con la base después de la mutación (Read Destino)
 
+### DESCRIPCIÓN DEL ALGORITMO 
+
+1. El archivo lee la referencia de extensión .fa, de ella elimina todos los comentarios y los saltos de línea y solo toma la secuencia que almacena en el arrelo **Reference**.
+2. Usando una distribución uniforme, se selecciona un punto en el arreglo **Reference** a partir de dicho punto se toman **L+READ_BIAS** elementos.
+3. Usando una distribución exponencial se cálcula la máxima cantida de errores **Kmax** para el **P0** que se determinó en la línea de comandos y usando una distribución uniforme, se determina la cantidad de errores que va a tener dicho read en el intervalo [0-Kmax]
+4. La distribución uniforme se usa también para determinar cuál tipo de matching va a tener el Read, qué mutación se va a aplicar en cierto offset y finalmente,si la mutación lo necesita, que base va a reemplazar la base de la referencia.
+5. El algoritmo son dos ciclos anidados, el primero genera Reads completos, y el segundo aplica las mutaciones en los offsets determinados a cada Read.
+6. En caso de que **lendesc = 0** se dice que el matching fué perfecto y se imprime directamente el Read.
+
 
 ### CONSIDERACIONES DE PRUEBA
 
@@ -83,8 +92,8 @@ uint8_t*  | BaseRead | Arreglo con la base después de la mutación (Read Destin
                         NOMBRES DE LOS ARCHIVOS ANTERIORES
 
 ## COMO COMPILAR 
-[x] gcc -o ARF MainARF.c Matching.c Mutation.c  Stats.c FilesUtils.c -lm
-[x] ./ARF -DATA lambda_virus.fa -I -Q -L 1024 -B 200000 -C 10 -P0 0.02
+[x]gcc -o ARF MainARF.c Matching.c Mutation.c  Stats.c FilesUtils.c -lm
+[x]./ARF -DATA lambda_virus.fa -I -Q -L 1024 -B 200000 -C 10 -P0 0.02
 _NOTA:_ Recuerde que los parámtros C y P0 se van a variar en las pruebas    
 
 ## _ACLARACIÓN SOBRE DISTRIBUCIÓN_

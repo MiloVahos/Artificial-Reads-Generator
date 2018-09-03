@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
 	uint16_t L	=	0;	//LONGITUD DEL READ
 	uint8_t	 C	=	0;	//COVERAGE
 	uint32_t B	=	0;	//BASE
+	int		 E	=	0;	//BANDERA PARA FIJA LA CANTIDAD DE ERRORES
 	double 	 P0 = 	0;	//VALOR AJUSTABLE DE ENTRADA
 
 	//VARIABLES DEL PROCESO PARA SALIDA
@@ -64,6 +65,7 @@ int main(int argc, char *argv[]) {
 	uint32_t  	id; 		//Identificador consecutivo para cada uno de los Reads
 	uint32_t 	Pos;        //Posición de Matching respecto a la referencia
 	uint16_t  	lendesc;    //Cantidad de errores total en el Read
+	uint16_t	StaticE;	//Cuando la cantidad de errores sea fija, se usa este parámetro
 	char      	strand;     //Caractér con el sentido del matching
 	uint8_t   	*Oper;      //Arreglo con la operación por error
 	uint16_t	*Cnt;		//Arreglo con los contadores por cada uno de los tipos de mutación
@@ -94,6 +96,10 @@ int main(int argc, char *argv[]) {
 			if (strcmp(argv[i], "-L") 		== 0)	L		=	(uint16_t) atoi(argv[i+1]);
 			if (strcmp(argv[i], "-C") 		== 0)	C		=	(uint8_t)  atoi(argv[i+1]);
 			if (strcmp(argv[i], "-B") 		== 0)	B		=	(uint32_t) atoi(argv[i+1]);
+			if (strcmp(argv[i], "-E") 		== 0) {
+				E	=	1;
+				StaticE	=	(uint16_t) atoi(argv[i+1]);
+			}
 			if (strcmp(argv[i], "-P0") 		== 0)	P0		=	atof(argv[i+1]);
 		}
 	} 
@@ -212,9 +218,13 @@ int main(int argc, char *argv[]) {
 		//fprintf(ALIGN,"Referencia: %s\n",Read);
 
 		//CALCULAR LA CANTIDAD DE ERROES
-		dado	=	LanzarDado();
-		lendesc	=	BusqBin_Rul(ErrorStat,t,dado);
-		fprintf(ALIGN,"K: %"PRIu16" - ",lendesc);
+		if ( E	!=	1 ) {
+			dado	=	LanzarDado();
+			lendesc	=	BusqBin_Rul(ErrorStat,t,dado);
+			fprintf(ALIGN,"K: %"PRIu16" - ",lendesc);
+		} else {
+			lendesc	=	StaticE;
+		}
 
 		//AQUÍ HAY DOS POSIBILIDADES, QUE EXISTAN ERRORES Y QUE NO
 		if(lendesc	!=	0){
@@ -287,8 +297,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	//IMPRIMIR EL HISTOGRAMA
-	fprintf(ALIGN,"MUTATIONS HISTOGRAM\n");
-	fprintf(ALIGN,"s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
+	fprintf(META,"MUTATIONS HISTOGRAM\n");
+	fprintf(META,"s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
 	//printf("s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
 
 	fclose(META);
