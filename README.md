@@ -92,8 +92,9 @@ uint8_t*  | BaseRead | Arreglo con la base después de la mutación (Read Destin
                         NOMBRES DE LOS ARCHIVOS ANTERIORES
 
 ## COMO COMPILAR 
-[x]gcc -o ARF MainARF.c Matching.c Mutation.c  Stats.c FilesUtils.c -lm
-[x]./ARF -DATA lambda_virus.fa -I -Q -L 1024 -B 200000 -C 10 -P0 0.02
+- [x] gcc -o ARF MainARF.c Matching.c Mutation.c  Stats.c FilesUtils.c -lm
+- [x] ./ARF -DATA lambda_virus.fa -I -Q -L 1024 -B 200000 -C 10 -P0 0.02
+
 _NOTA:_ Recuerde que los parámtros C y P0 se van a variar en las pruebas    
 
 ## _ACLARACIÓN SOBRE DISTRIBUCIÓN_
