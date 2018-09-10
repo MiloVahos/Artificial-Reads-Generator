@@ -28,7 +28,7 @@ DATA | Nombre del archivo de extensión fasta | char*
 I | Bandera del identificador de los reads, es un valor fijo, cambia el id | char*
 Q | Bandera de los quality score de los reads, es un valor fijo, no cambia | char*
 L | Longitud de la secuencia de los reads | uint16_t [0-1024]
-C | Valor entre [10 - 100], determina la cantidad de Reads | uint8_t
+C | Valor entre [10 - 100], determina la cobertura en el muestreo de los Reads | uint8_t
 B | Valor fijo en 200000, B*C = Cantidad de reads a generar | uint32_t
 P0 | Es el valor de ajuste de la distribución exponencial | double
 

@@ -180,10 +180,10 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 
 				dado		=	LanzarDado();
 				sel			=	BusqBin_Rul(BasesAcum,4,dado);
-				BaseDest	=	selBase(sel,ReadAuxiliar[posRead]);
+				BaseDest	=	selBase(sel,ReadAuxiliar[Offsets[i]]);
 				
-				BaseRef[i]	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i]	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
 
 				Read[posRead]	=	BaseDest;
 
@@ -193,8 +193,8 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 			case 'd':
 				posRead	= 	posRead + OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[posRead];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[posRead];
 
 				for( int q = posRead; q < L-1; q++ ){
   					Read[q]	=	Read[q+1];
@@ -207,7 +207,7 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 
 				dado		=	LanzarDado();
 				sel			=	BusqBin_Rul(BasesAcum,4,dado);
-				BaseDest	=	selBase(sel,ReadAuxiliar[posRead]);
+				BaseDest	=	selBase(sel,ReadAuxiliar[Offsets[i]]);
 
 				BaseRef[i] 	=	'0';
 
@@ -223,8 +223,8 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 			case 'D':
 				posRead	=	posRead	+ OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
 
 				for( int q = posRead; q< L-2; q++ ){
   			   		Read[q]	=	Read[q+2];
@@ -235,8 +235,8 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 			case 'I':
 				posRead	=	posRead + OffRel[i];
 
-				BaseRef[i]		=	ReadAuxiliar[posRead];
-				//BaseRef[i]		=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i]		=	ReadAuxiliar[posRead];
+				BaseRef[i]		=	ReadAuxiliar[Offsets[i]];
 
 				for( int q = (L-1); q > posRead; q-- ) {
 					Read[q]	=	Read[q-1];
@@ -250,8 +250,8 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 			case 'T':
 				posRead	=	posRead	+ OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i] 	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i] 	=	ReadAuxiliar[Offsets[i]];
 
 				for( int q = posRead; q< L-3; q++ ){
 					Read[q]	=	Read[q+3];
@@ -263,14 +263,14 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				flag = 0;
 				posRead	=	posRead	+ OffRel[i];
 
-				BaseRef[i]		=	ReadAuxiliar[posRead];
-				//BaseRef[i]		=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i]		=	ReadAuxiliar[posRead];
+				BaseRef[i]		=	ReadAuxiliar[Offsets[i]];
 
 				do{
 
 					dado		=	LanzarDado();
 					sel			=	BusqBin_Rul(BasesAcum,4,dado);
-					BaseDest	=	selBase(sel,ReadAuxiliar[posRead]);
+					BaseDest	=	selBase(sel,ReadAuxiliar[Offsets[i]]);
 
 					if(BaseDest != Read[posRead+1]){
 
@@ -289,8 +289,8 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 			case 'C':
 				posRead	=	posRead	+ OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i] 	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i] 	=	ReadAuxiliar[Offsets[i]];
 				
 				for( int q = posRead; q< L-4; q++ ){
   			   		Read[q]	=	Read[q+4];
@@ -331,10 +331,10 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 
 				dado		=	LanzarDado();
 				sel			=	BusqBin_Rul(BasesAcum,4,dado);
-				BaseDest	=	selBase(sel,ReadAuxiliar[posRead]);
+				BaseDest	=	selBase(sel,ReadAuxiliar[Offsets[i]]);
 
-				BaseRef[i]	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i]	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
 				
 				Read[posRead]	=	BaseDest;
 
@@ -344,8 +344,8 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 			case 'd':
 				posRead	= 	posRead - OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
 
 
 				for( int q = posRead; q < L-1; q++ ){
@@ -362,7 +362,7 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 
 				dado		=	LanzarDado();
 				sel			=	BusqBin_Rul(BasesAcum,4,dado);
-				BaseDest	=	selBase(sel,ReadAuxiliar[posRead]);
+				BaseDest	=	selBase(sel,ReadAuxiliar[Offsets[i]]);
 
 				for( int q = (L-1); q > posRead+1; q--){
   					Read[q]	=	Read[q-1];
@@ -374,8 +374,8 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 			case 'D':
 				posRead	=	posRead	- OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
 
 				for( int q = posRead-1; q< L-2; q++ ){
   			   		Read[q]	=	Read[q+2];
@@ -387,8 +387,8 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 			case 'I':
 				posRead	=	posRead - OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
 
 				for( int q = (L-1); q > posRead+1; q-- ) {
 					Read[q]	=	Read[q-1];
@@ -400,8 +400,8 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 			case 'T':
 				posRead	=	posRead	- OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
 
 				for( int q = posRead-2; q< L-3; q++ ){
 					Read[q]	=	Read[q+3];
@@ -414,14 +414,14 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 				flag = 0;
 				posRead	=	posRead	- OffRel[i];
 
-				BaseRef[i]		=	ReadAuxiliar[posRead];
-				//BaseRef[i]		=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i]		=	ReadAuxiliar[posRead];
+				BaseRef[i]		=	ReadAuxiliar[Offsets[i]];
 
 				do{
 
 					dado		=	LanzarDado();
 					sel			=	BusqBin_Rul(BasesAcum,4,dado);
-					BaseDest	=	selBase(sel,ReadAuxiliar[posRead]);
+					BaseDest	=	selBase(sel,ReadAuxiliar[Offsets[i]]);
 
 					if(BaseDest != Read[posRead+1]){
 
@@ -440,8 +440,8 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 			case 'C':
 				posRead	=	posRead	- OffRel[i];
 
-				BaseRef[i] 	=	ReadAuxiliar[posRead];
-				//BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
+				//BaseRef[i] 	=	ReadAuxiliar[posRead];
+				BaseRef[i]	=	ReadAuxiliar[Offsets[i]];
 
 				for( int q = posRead-3; q< L-4; q++ ){
   			   		Read[q]	=	Read[q+4];
