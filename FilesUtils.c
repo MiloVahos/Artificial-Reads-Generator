@@ -71,19 +71,23 @@ void getReference(char *FileName, char *Reference){
 void generateRead(char *Read, uint32_t id, uint16_t L, char *Q, char *I, FILE *FASTQ, FILE *FASTQSEQ){
 
 	//SE CORTA LA SECUENCIA DE MODO QUE QUEDE DE LONGITUD L
-	char	*FinalRead	=	(char*) malloc(L*sizeof(char));
-	memcpy(FinalRead,Read,L);
+	//char	*FinalRead	=	(char*) malloc(L*sizeof(char));
+	//memcpy(FinalRead,Read,L);
 
 	//SE IMPRIME EL READ
 	fprintf(FASTQ,"@%s %"PRIu32"\n",I,id);	//ID
-	fprintf(FASTQ,"%s\n",FinalRead);	//SECUENCE
+	fwrite(Read,sizeof(char),L,FASTQ);
+	fprintf(FASTQ,"\n");
+	//fprintf(FASTQ,"%s\n",FinalRead);	//SECUENCE
 	fprintf(FASTQ,"+\n");			//EMPTY COMMENT
 	fprintf(FASTQ,"%s",Q);			//QUALITY SCORE
 
 	//SE IMPRIME LA SECUENCIA SOLA EN EL ARCHIVO FASTQSEQ
-	fprintf(FASTQSEQ,"Read: %"PRIu32", Secuencia: %s\n",id,FinalRead);
+	fprintf(FASTQSEQ,"Read: %"PRIu32", Secuencia: ",id);
+	fwrite(Read,sizeof(char),L,FASTQSEQ);
+	fprintf(FASTQSEQ,"\n");
 
-	free(FinalRead);
+	//free(FinalRead);
 
 }
 
