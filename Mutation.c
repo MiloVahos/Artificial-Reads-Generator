@@ -67,7 +67,9 @@ char selBase(int sel,char Base){
 				case 3: return 'N'; break;
 			}
 		break;
+		default: printf("Error Fatal: Base no reconocida\n");
 	}
+
 }
 
 //mutsVector:	Genera un vector con todas las operaciones de mutación que se van a aplicar
@@ -172,7 +174,6 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 		int sel = 0;
 		char BaseDest;
 		int flag = 0;
-
 		switch ( (char) Oper[i] ){
 
 			case 's':
@@ -271,7 +272,6 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 					dado		=	LanzarDado();
 					sel			=	BusqBin_Rul(BasesAcum,4,dado);
 					BaseDest	=	selBase(sel,ReadAuxiliar[Offsets[i]]);
-
 					if(BaseDest != Read[posRead+1]){
 
 						Read[posRead]	=	BaseDest;

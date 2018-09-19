@@ -20,5 +20,5 @@ uint64_t 	contChars	(char*);
 void 		getReference	(char*,char*);
 void		generateRead	(char*,uint32_t,uint16_t,char*,char*,FILE*,FILE*);
 void		printCounters	(FILE*,uint16_t*);
-
+int		validBase	(char);
 #endif

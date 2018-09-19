@@ -37,8 +37,9 @@ int main(int argc, char *argv[]) {
 	uint16_t L	=	0;	//LONGITUD DEL READ
 	uint8_t	 C	=	0;	//COVERAGE
 	uint32_t B	=	0;	//BASE
-	int		 E	=	0;	//BANDERA PARA FIJA LA CANTIDAD DE ERRORES
-	double 	 P0 = 	0;	//VALOR AJUSTABLE DE ENTRADA
+	int	 E	=	0;	//BANDERA PARA FIJA LA CANTIDAD DE ERRORES
+	double 	 P0 	= 	0;	//VALOR AJUSTABLE DE ENTRADA
+	int 	 QFlag	=	0;	//BANDERA DE Q
 
 	//VARIABLES DEL PROCESO PARA SALIDA
 	char *MT;	//MATCHING TYPE
@@ -86,13 +87,12 @@ int main(int argc, char *argv[]) {
 			if (strcmp(argv[i], "-I")		== 0){
 				I	=	(char*) malloc(READID_SIZE*sizeof(char));
 				if (I	==	NULL) printf ("Not enough memory for I"); 
-				strcpy(I,"@EAS139:136:FC706VJ:2:2104:15343:197393 1:N:18:190");
+				strcpy(I,"@EAS139:136:FC706VJ:2:2104:15343:197393:1:N:18:190");
 			}	
 			if (strcmp(argv[i], "-Q")		== 0){
 				Q	= 	(char*) malloc(READQ_SIZE*sizeof(char));
 				if (Q	==	NULL) printf ("Not enough memory for Q"); 
-				memset(Q,'B',1024);
-				//strcpy(Q,"3eEKj]-6LgGAE84dgkck14J0Gh[LK0d9jjC5Lk]JbD]cfe0I-6G6KcL2-I7k-kE98EK3hJhjLa^Bf4A9i3C6i6IaJc3a1L78Ai31a738Acj372FDAIedE98Ff*EB3B2iE2L5hajfcfAAFgL57l3-53]039HJ5JGEBc1E]HGJi[dK[lf2*_4B6Kc6K4D8DGLk_h]8jekHBiJ0H816BJ[fCe1]DLBI2]dB]1aHa]3kbK2CF^eifeKa3E*LH-_CJibb[^aBffKFB7dIH3Jgi6hLGjlJa5**l4bJclJaFf065f0be8heIG9j_lABK_LC568KhDFgBK]3Fc61bk_5HF5A7*2-l9-gCfA351l5B67ICh2gEJDG65eJa*LEK1Bk_[EgGHL1b0[]LJ222Id_hDi]K-Ea^l-BAl4ecbEH9k0h-bB[hL8^02e05B7fj]C1lK^ebaBcG3[clC]hKf]797F36C___i2igcJfcKh]4-5_5k[Cflc6j2[b11[E^-9k]5c-jDjED^H6fgbBhEH07B3BJD[d0cAj0^AEeklI*3[j1lg-JK0j6-5d-EjicGk3Lk6CBfLGL7]g80d97l97*bhbA2b]9H-fJCk8[d_G3^e*89kCD_cdjhkH^lg]LBK1-G0c_c*2KaHk7KDEfgkeD6aB61cEcIja[IeGbJ[0g-ghhI*A82[cFkJ40Hh]-7Hi0Fh^K47CfCbCI9La74bK3g_[bBH4^BfgkF8-^1dfj1FCA15af95B*8k^]5AJEDf27H6Kb^i1KHBAHic1bkIKal]B58-^HfA2kgI9_Hg^^4HB^LiBh]1F_8K*C^KJHgcI^3JhAeki[0_0AJec469h]5A2gCl9hA56f8a3c31JfKg9lhC33lKH91C2j4bC^f3Id2kffFB*6K3EH_fGH157lKKJkG8Ll6]gL91^3i_ik-EB4d1BB_8-fIG*kIgk^-c1H34gIa9B[eCHD[*H90A2AkFjli3d2dKJD1^FjAEH3CBh1g[h168F88bbdEH8-_hK]jj[");
+				QFlag	=	1;
 			}
 			if (strcmp(argv[i], "-L") 		== 0)	L		=	(uint16_t) atoi(argv[i+1]);
 			if (strcmp(argv[i], "-C") 		== 0)	C		=	(uint8_t)  atoi(argv[i+1]);
@@ -104,6 +104,8 @@ int main(int argc, char *argv[]) {
 			if (strcmp(argv[i], "-P0") 		== 0)	P0		=	atof(argv[i+1]);
 		}
 	} 
+
+	if ( QFlag == 1 ) memset(Q,'B',L); 
 
 	//OBTENER EL NOMBRE DE LA SECUENCIA Y CREAR EL NOMBRE DE LOS ARCHIVOS DE SALIDA
 	RefName		=	(char*)	malloc(NAMES_SIZE*sizeof(char));
@@ -226,7 +228,6 @@ int main(int argc, char *argv[]) {
 		} else {
 			lendesc	=	StaticE;
 		}
-
 		//AQUÍ HAY DOS POSIBILIDADES, QUE EXISTAN ERRORES Y QUE NO
 		if(lendesc	!=	0){
 			
@@ -262,13 +263,11 @@ int main(int argc, char *argv[]) {
 			if (BaseRef	==	NULL) printf ("Not enough memory for BaseRef");
 			BaseRead	=	(uint8_t*)  malloc((lendesc)*sizeof(uint8_t));
 			if (BaseRead 	==	NULL) printf ("Not enough memory for BaseRead");
-
 			if ((strand	==	'f')||(strand	==	'c')) {
 				FordwardMutation(Oper,Read,Offsets,OffRel,lendesc,BaseRead,BaseRef,BasesAcum,L,ALIGN);
 			} else {
 				ReverseMutation(Oper,Read,Offsets,OffRel,lendesc,BaseRead,BaseRef,BasesAcum,L,ALIGN);
 			}
-
 			if(BaseRef)		free(BaseRef);
 			if(BaseRead)	free(BaseRead);
 
@@ -291,7 +290,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		fprintf(ALIGN,"\n\n");
-		fprintf(FASTQ,"\n\n");
+		//fprintf(FASTQ,"\n\n");
 
 		if(Read)	free(Read);
 		if(MT)		free(MT);
@@ -300,7 +299,7 @@ int main(int argc, char *argv[]) {
 	//IMPRIMIR EL HISTOGRAMA
 	fprintf(META,"MUTATIONS HISTOGRAM\n");
 	fprintf(META,"s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
-	//printf("s: %"PRIu32" - d: %"PRIu32": i: %"PRIu32" - D: %"PRIu32" - I: %"PRIu32" - T: %"PRIu32" - S: %"PRIu32" - C: %"PRIu32" \n",Hist[0],Hist[1],Hist[2],Hist[3],Hist[4],Hist[5],Hist[6],Hist[7]);
+
 
 	fclose(META);
 	fclose(ALIGN);
