@@ -8,9 +8,9 @@
  ============================================================================
  */
 #include "Mutation.h"
+#include "Stats.h"
 #include <inttypes.h>
 #include <stdio.h>
-#include "Stats.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -98,7 +98,6 @@ void mutsVector (uint16_t lendesc,uint8_t *Oper,uint16_t *Cnt,uint32_t *Hist,dou
 	Hist[5]	=	Hist[5]	+	Cnt[5];
 	Hist[6]	=	Hist[6]	+	Cnt[6];
 	Hist[7]	=	Hist[7]	+	Cnt[7];
-
 }
 
 //offsetsGen:	Genera un vector con los offsets donde se van a aplicar las mutaciones

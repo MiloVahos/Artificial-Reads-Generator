@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	uint16_t L	=	0;	//LONGITUD DEL READ
 	uint8_t	 C	=	0;	//COVERAGE
 	uint32_t B	=	0;	//BASE
-	int	 E	=	0;	//BANDERA PARA FIJA LA CANTIDAD DE ERRORES
+	int	 	 E	=	0;	//BANDERA PARA FIJA LA CANTIDAD DE ERRORES
 	double 	 P0 	= 	0;	//VALOR AJUSTABLE DE ENTRADA
 	int 	 QFlag	=	0;	//BANDERA DE Q
 
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
 
 		//GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
 		Pos		=	(rand() %((TotalChars-L-READ_BIAS) - 0 + 1)) + 0;
-		fprintf(ALIGN,"Offset Ref: %"PRIu32"\n",Pos);
+		fprintf(ALIGN,"Map Pos: %"PRIu32"\n",Pos);
 
 		//OBTENER EL READ DE REFERENCIA DESDE LA POSICIÓN DE MAPEO
 		Read	=	(char*) malloc((L+READ_BIAS)*sizeof(char));

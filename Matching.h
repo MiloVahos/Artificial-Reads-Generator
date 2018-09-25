@@ -17,6 +17,6 @@
 
 void    ReverseRead     (char*,uint16_t);
 void 	ComplementRead  (char*,uint16_t);
-void	selMatching	(int,uint16_t,char*,char*);
+void	selMatching	    (int,uint16_t,char*,char*);
 
 #endif
