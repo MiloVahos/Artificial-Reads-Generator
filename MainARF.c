@@ -284,7 +284,7 @@ int main(int argc, char *argv[]) {
 			//COMO NO HAY ERRORES EL MATCHING SE REPRESENTA EN MAYÚSCULA Y ES PERFECTO
 			strand	= *MT;
 			//EN EL ARCHIVO DE ALINEACIÓN SE MUESTRA EL TIPO DE MATCH NADA MÁS
-			fprintf(ALIGN,"MT: %c\n",strand);
+			fprintf(ALIGN,"%c\n",strand);
 			//SE IMPRE EL READ Y LA SECUENCIA
 			generateRead(Read,id,L,Q,I,FASTQ,FASTQSEQ);
 		}
