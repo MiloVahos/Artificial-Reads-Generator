@@ -4,8 +4,7 @@
  Author      : 	Juan Camilo Peña Vahos - Aníbal Guerra - Sebastian Isaza Ramírez
  Version     :
  Copyright   : 	This project is totally opensource
- Description :	Generador de reads artificiales, partiendo de un archivo fasta
- 	 	 	 	referencia para generar reads
+ Description :	Versión del ARG modificada para probar el encoder
  ============================================================================
  */
 
@@ -193,6 +192,10 @@ int main(int argc, char *argv[]) {
 	TotalReads	=	B*C;							//NUMERO TOTAL DE READS A GENERAR
 	srand(time(NULL));								//SEMILLA DE LOS ALEATOREOS
 
+	fprintf(ALIGN, "%"PRIu32"\n",B);
+	fprintf(ALIGN, "%"PRIu8"\n",C);
+	fprintf(ALIGN, "+\n");
+
 	for(uint32_t ReadsCicle = 0; ReadsCicle<TotalReads; ReadsCicle++){
 
 		MT	=	(char*) malloc(sizeof(char));
@@ -200,11 +203,9 @@ int main(int argc, char *argv[]) {
 
 		//IDENTIFICADOR DEL READ
 		id	=	ReadsCicle+1;
-		fprintf(ALIGN,"ID: %"PRIu32" - ",id);
-
 		//GENERAR UNA POSICIÓN ALEATORIA EN EL RANGO [0,LengthRef-LengthRead]
 		Pos		=	(rand() %((TotalChars-L-READ_BIAS) - 0 + 1)) + 0;
-		fprintf(ALIGN,"Map Pos: %"PRIu32"\n",Pos);
+		fprintf(ALIGN,"%"PRIu32"\n",Pos);
 
 		//OBTENER EL READ DE REFERENCIA DESDE LA POSICIÓN DE MAPEO
 		Read	=	(char*) malloc((L+READ_BIAS)*sizeof(char));
@@ -224,7 +225,7 @@ int main(int argc, char *argv[]) {
 		if ( E	!=	1 ) {
 			dado	=	LanzarDado();
 			lendesc	=	BusqBin_Rul(ErrorStat,t,dado);
-			fprintf(ALIGN,"K: %"PRIu16" - ",lendesc);
+			fprintf(ALIGN,"%"PRIu16"\n",lendesc);
 		} else {
 			lendesc	=	StaticE;
 		}
@@ -245,7 +246,7 @@ int main(int argc, char *argv[]) {
 
 			//EL MATCHING SE PONE EN MINÚSCULA
 			strand	=	(char) tolower(*MT);
-			fprintf(ALIGN,"MT: %c\n",strand);
+			fprintf(ALIGN,"%c\n",strand);
 
 			//SE VA A DETERMINAR EL VECTOR DE OPERACIONES PARA CALCULAR
 			//LOS OFFSETS DE MANERA EFICIENTE
@@ -272,7 +273,7 @@ int main(int argc, char *argv[]) {
 			if(BaseRead)	free(BaseRead);
 
 			//IMPRIMIR LOS CONTADORES
-			printCounters(ALIGN,Cnt);
+			//printCounters(ALIGN,Cnt);
 			//GENERAR EL READ
 			generateRead(Read,id,L,Q,I,FASTQ,FASTQSEQ);
 			if(Oper)	free(Oper);
@@ -289,7 +290,7 @@ int main(int argc, char *argv[]) {
 			generateRead(Read,id,L,Q,I,FASTQ,FASTQSEQ);
 		}
 
-		fprintf(ALIGN,"\n\n");
+		fprintf(ALIGN,"-\n");
 		//fprintf(FASTQ,"\n\n");
 
 		if(Read)	free(Read);

@@ -298,10 +298,10 @@ void FordwardMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *Off
 				BaseRead[i]	=	'0';
 			break;
 		}
-		fprintf(ALIGN,"MUT: %c - ",Oper[i]);
-		fprintf(ALIGN,"Off[%d] = %d - ",i,Offsets[i]);
-		fprintf(ALIGN,"BRef %c - ",BaseRef[i]);
-		fprintf(ALIGN,"BRead %c\n",BaseRead[i]);
+		fprintf(ALIGN,"%c\n",Oper[i]);
+		fprintf(ALIGN,"%d\n",Offsets[i]);
+		fprintf(ALIGN,"%c\n",BaseRef[i]);
+		fprintf(ALIGN,"%c\n",BaseRead[i]);
 	}
 
 	if(ReadAuxiliar) free(ReadAuxiliar);
@@ -450,10 +450,10 @@ void ReverseMutation (	uint8_t *Oper,char *Read,uint16_t *Offsets,uint16_t *OffR
 				posRead		=	posRead - 4;
 			break;
 		}
-		fprintf(ALIGN,"MUT: %c - ",Oper[i]);
-		fprintf(ALIGN,"Offset[%d] =	%d - ",i,Offsets[i]);
-		fprintf(ALIGN,"BRef %c - ",BaseRef[i]);
-		fprintf(ALIGN,"BRead %c\n",BaseRead[i]);
+		fprintf(ALIGN,"%c\n",Oper[i]);
+		fprintf(ALIGN,"%d\n",Offsets[i]);
+		fprintf(ALIGN,"%c\n",BaseRef[i]);
+		fprintf(ALIGN,"%c\n",BaseRead[i]);
 	}
 
 	if(ReadAuxiliar)	free(ReadAuxiliar);
