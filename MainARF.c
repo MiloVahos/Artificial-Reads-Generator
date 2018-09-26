@@ -194,7 +194,6 @@ int main(int argc, char *argv[]) {
 
 	fprintf(ALIGN, "%"PRIu32"\n",B);
 	fprintf(ALIGN, "%"PRIu8"\n",C);
-	fprintf(ALIGN, "+\n");
 
 	for(uint32_t ReadsCicle = 0; ReadsCicle<TotalReads; ReadsCicle++){
 
@@ -289,8 +288,6 @@ int main(int argc, char *argv[]) {
 			//SE IMPRE EL READ Y LA SECUENCIA
 			generateRead(Read,id,L,Q,I,FASTQ,FASTQSEQ);
 		}
-
-		fprintf(ALIGN,"-\n");
 		//fprintf(FASTQ,"\n\n");
 
 		if(Read)	free(Read);

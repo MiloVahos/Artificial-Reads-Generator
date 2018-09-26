@@ -8,15 +8,13 @@
 ## ESTRUCTURA
 - B
 - C
-- '+'   -> Este caracter indica que en la siguiente linea empiezan los reads
 - MapPos
 - lendesc
 - strand
-- oper         ->SE REPITEN LENDESC VECES           
-- offset       ->SE REPITEN LENDESC VECES   
-- baseRef      ->SE REPITEN LENDESC VECES    
+- oper         ->SE REPITEN LENDESC VECES
+- offset       ->SE REPITEN LENDESC VECES
+- baseRef      ->SE REPITEN LENDESC VECES
 - baseRead     ->SE REPITEN LENDESC VECES
-- '-' -> Este caracter indica que acabó el read y sigue otro
 
 _NOTA IMPORTANTE: Nunca hacer merge de esta versión al branch master
 
