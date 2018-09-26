@@ -18,6 +18,8 @@
 - baseRead     ->SE REPITEN LENDESC VECES
 - '-' -> Este caracter indica que acabó el read y sigue otro
 
+_NOTA IMPORTANTE: Nunca hacer merge de esta versión al branch master
+
 ### DEVELOPERS:
 _Juan Camilo Peña Vahos_ @MiloVahos96,
 
